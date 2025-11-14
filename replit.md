@@ -75,3 +75,64 @@ The application runs on port 5000 and uses a pre-trained Support Vector Classifi
 - ✅ Added lifestyle recommendations based on health metrics
 - ✅ Fixed critical blood pressure logic to properly evaluate both systolic and diastolic readings
 - ✅ Enhanced form with blood pressure and family history inputs
+
+## Pending Tasks
+Visualizations
+
+Super appealing in a UI:
+
+BMI chart
+
+Blood sugar gauge
+
+Risk probability bars
+
+SHAP feature importance chart
+
+Nutrition breakdown pie chart
+
+Streamlit + matplotlib would make this easy.
+
+⭐ 5. User Profiles & Saving Data
+
+Let users:
+
+Create account / profile
+
+Save their test results
+
+Track change over time
+
+Compare old vs new predictions
+
+This requires:
+
+SQLite (lightweight)
+
+Or Firebase (cloud)
+
+Or simple JSON storage
+
+⭐ 6. A Chat-Like Health Assistant
+
+You can add a simple chat UI for:
+
+Diet questions
+
+Exercise suggestions
+
+Healthy habit reminders
+
+Doesn’t need AI — can be rule-based or partially scripted.
+
+⭐ 7. Optional: Gamification
+
+Small touches make it feel modern:
+
+Daily health points
+
+Streaks for logging meals
+
+Achievement badges
+
+Weekly progress stats
