@@ -13,17 +13,25 @@
 
 <body>
  <div class="login">
-        <h1>Diabetes Predictor & Diet Planner</h1>
+        <h1>Diabetes Predictor & Health Planner</h1>
 
      
     <form action="{{ url_for('predict')}}"method="post">
-        <input type="text" name="Glucose Level" placeholder="Glucose Level" required="required" />
-        <input type="text" name="Insulin" placeholder="Insulin" required="required" />
-        <input type="text" name="BMI" placeholder="BMI" required="required" />
-        <input type="text" name="Age" placeholder="Age" required="required" />
-                
+        <input type="text" name="Glucose Level" placeholder="Glucose Level (mg/dL)" required="required" />
+        <input type="text" name="Insulin" placeholder="Insulin (μU/mL)" required="required" />
+        <input type="text" name="BMI" placeholder="BMI (e.g., 25.5)" required="required" />
+        <input type="text" name="Age" placeholder="Age (years)" required="required" />
+        <input type="text" name="Blood Pressure Systolic" placeholder="Blood Pressure - Top Number (e.g., 120)" required="required" />
+        <input type="text" name="Blood Pressure Diastolic" placeholder="Blood Pressure - Bottom Number (e.g., 80)" required="required" />
+        
+        <div class="checkbox-container">
+            <label class="checkbox-label">
+                <input type="checkbox" name="Family History" value="yes" />
+                <span>I have a family history of diabetes</span>
+            </label>
+        </div>
 
-        <button type="submit" class="btn btn-primary btn-block btn-large">Predict & Get Diet Plan</button>
+        <button type="submit" class="btn btn-primary btn-block btn-large">Get Complete Health Analysis</button>
     </form>
 
    <br>
@@ -223,6 +231,90 @@
            <ul>
            {% for tip in diet_plan.tips %}
                <li>{{ tip }}</li>
+           {% endfor %}
+           </ul>
+       </div>
+   </div>
+   {% endif %}
+
+   {% if checkup_plan %}
+   <div class="checkup-plan">
+       <h2>Health Checkup Recommendations</h2>
+       
+       <div class="plan-section">
+           <h3>Blood Pressure Status</h3>
+           <p>Your Blood Pressure: <strong class="bp-status-{{ checkup_plan.blood_pressure_info.status }}">{{ checkup_plan.blood_pressure_info.reading }}</strong></p>
+           <p>Category: <strong class="bp-status-{{ checkup_plan.blood_pressure_info.status }}">{{ checkup_plan.blood_pressure_info.category }}</strong></p>
+           {% if checkup_plan.family_history %}
+           <p><strong>⚠️ Family History:</strong> You have indicated a family history of diabetes. This increases your risk and requires more frequent monitoring.</p>
+           {% endif %}
+       </div>
+       
+       <div class="plan-section">
+           <h3>Doctor Visit Frequency</h3>
+           <p><strong>{{ checkup_plan.checkup_frequency.doctor_visits }}</strong></p>
+           <p><em>{{ checkup_plan.checkup_frequency.reason }}</em></p>
+       </div>
+       
+       <div class="plan-section">
+           <h3>Recommended Blood Tests</h3>
+           
+           {% if checkup_plan.blood_tests.essential %}
+           <div class="test-category">
+               <h4>🔴 Essential Tests (High Priority)</h4>
+               {% for test in checkup_plan.blood_tests.essential %}
+               <div class="test-item">
+                   <h5>{{ test.name }}</h5>
+                   <p>{{ test.reason }}</p>
+                   <p class="frequency">Frequency: {{ test.frequency }}</p>
+               </div>
+               {% endfor %}
+           </div>
+           {% endif %}
+           
+           {% if checkup_plan.blood_tests.recommended %}
+           <div class="test-category">
+               <h4>🟡 Recommended Tests</h4>
+               {% for test in checkup_plan.blood_tests.recommended %}
+               <div class="test-item">
+                   <h5>{{ test.name }}</h5>
+                   <p>{{ test.reason }}</p>
+                   <p class="frequency">Frequency: {{ test.frequency }}</p>
+               </div>
+               {% endfor %}
+           </div>
+           {% endif %}
+           
+           {% if checkup_plan.blood_tests.optional %}
+           <div class="test-category">
+               <h4>🟢 Optional Tests</h4>
+               {% for test in checkup_plan.blood_tests.optional %}
+               <div class="test-item">
+                   <h5>{{ test.name }}</h5>
+                   <p>{{ test.reason }}</p>
+                   <p class="frequency">Frequency: {{ test.frequency }}</p>
+               </div>
+               {% endfor %}
+           </div>
+           {% endif %}
+       </div>
+       
+       <div class="plan-section">
+           <h3>Lifestyle Recommendations</h3>
+           {% for tip in checkup_plan.lifestyle_tips %}
+           <div class="lifestyle-tip">
+               <h5><span class="tip-icon">{{ tip.icon }}</span>{{ tip.category }}</h5>
+               <p><strong>{{ tip.recommendation }}</strong></p>
+               <p>{{ tip.details }}</p>
+           </div>
+           {% endfor %}
+       </div>
+       
+       <div class="plan-section next-steps-section">
+           <h3>Next Steps</h3>
+           <ul>
+           {% for step in checkup_plan.next_steps %}
+               <li>{{ step }}</li>
            {% endfor %}
            </ul>
        </div>
