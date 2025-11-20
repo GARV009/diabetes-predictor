@@ -1,0 +1,285 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Health Analysis Results - Health Manager{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-8">
+        <a href="{{ url_for('prediction.prediction_form') }}" class="text-medical-blue-600 hover:text-medical-blue-700 font-medium">
+            ← Back to Health Check
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900 mt-4">Your Health Analysis</h1>
+        <p class="text-gray-600 mt-2">Complete health assessment with personalized recommendations</p>
+    </div>
+
+    <div class="bg-gradient-to-r from-{% if health_record.risk_level == 'High' %}red{% else %}green{% endif %}-500 to-{% if health_record.risk_level == 'High' %}red{% else %}green{% endif %}-600 rounded-xl shadow-lg p-8 text-white mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold mb-2">{{ prediction_text }}</h2>
+                <p class="text-{% if health_record.risk_level == 'High' %}red{% else %}green{% endif %}-100">
+                    Risk Level: <span class="font-semibold">{{ health_record.risk_level }}</span>
+                </p>
+            </div>
+            <div class="hidden lg:block">
+                <div class="h-24 w-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <svg class="h-12 w-12" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                <span class="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </span>
+                Your Metrics
+            </h3>
+            <div class="space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Glucose</span>
+                    <span class="font-semibold">{{ health_record.glucose }} mg/dL</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Insulin</span>
+                    <span class="font-semibold">{{ health_record.insulin }} μU/mL</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">BMI</span>
+                    <span class="font-semibold">{{ health_record.bmi }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Age</span>
+                    <span class="font-semibold">{{ health_record.age }} years</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Blood Pressure</span>
+                    <span class="font-semibold">{{ health_record.bp_systolic }}/{{ health_record.bp_diastolic }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold mb-4">Health Metrics Visualization</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <canvas id="bmiChart"></canvas>
+                        <p class="text-center text-sm text-gray-600 mt-2">BMI Status</p>
+                    </div>
+                    <div>
+                        <canvas id="glucoseChart"></canvas>
+                        <p class="text-center text-sm text-gray-600 mt-2">Glucose Level</p>
+                    </div>
+                    <div>
+                        <canvas id="riskChart"></canvas>
+                        <p class="text-center text-sm text-gray-600 mt-2">Risk Assessment</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if diet_plan %}
+    <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                🥗
+            </span>
+            Your Personalized Diet Plan
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Daily Calorie Target</h3>
+                <p class="text-4xl font-bold text-green-600">{{ diet_plan.daily_calories }}</p>
+                <p class="text-gray-600 mt-1">calories per day</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Macronutrient Breakdown</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Carbohydrates</span>
+                        <span class="font-semibold">{{ diet_plan.macronutrients.carbohydrates }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Protein</span>
+                        <span class="font-semibold">{{ diet_plan.macronutrients.protein }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Healthy Fats</span>
+                        <span class="font-semibold">{{ diet_plan.macronutrients.healthy_fats }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <p class="text-sm text-gray-700">💡 <strong>Tip:</strong> {{ diet_plan.macronutrients.details }}</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-lg font-semibold mb-4">✅ Foods to Include</h3>
+                <div class="space-y-3">
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="font-medium text-gray-900 mb-2">Vegetables</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            {% for food in diet_plan.diabetic_friendly_foods.vegetables[:3] %}
+                            <li>• {{ food }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="font-medium text-gray-900 mb-2">Proteins</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            {% for food in diet_plan.diabetic_friendly_foods.proteins[:3] %}
+                            <li>• {{ food }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold mb-4">⚠️ Foods to Avoid</h3>
+                <div class="space-y-3">
+                    <div class="bg-red-50 rounded-lg p-3 border border-red-100">
+                        <p class="font-medium text-gray-900 mb-2">High Sugar</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            {% for food in diet_plan.foods_to_avoid.high_sugar[:3] %}
+                            <li>• {{ food }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-3 border border-red-100">
+                        <p class="font-medium text-gray-900 mb-2">Refined Carbs</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            {% for food in diet_plan.foods_to_avoid.refined_carbs[:3] %}
+                            <li>• {{ food }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if checkup_plan %}
+    <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                🩺
+            </span>
+            Health Checkup Recommendations
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Blood Pressure Status</h3>
+                <p class="text-2xl font-bold text-{% if checkup_plan.blood_pressure_info.status == 'concerning' %}red{% elif checkup_plan.blood_pressure_info.status == 'attention' %}yellow{% else %}green{% endif %}-600">
+                    {{ checkup_plan.blood_pressure_info.reading }}
+                </p>
+                <p class="text-gray-600 mt-1">{{ checkup_plan.blood_pressure_info.category }}</p>
+            </div>
+
+            <div class="bg-green-50 rounded-lg p-6 border border-green-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Doctor Visits</h3>
+                <p class="text-2xl font-bold text-green-600">{{ checkup_plan.checkup_frequency.doctor_visits }}</p>
+                <p class="text-sm text-gray-600 mt-1">{{ checkup_plan.checkup_frequency.reason }}</p>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <h3 class="text-lg font-semibold mb-3 text-red-600">🔴 Essential Tests</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {% for test in checkup_plan.blood_tests.essential[:4] %}
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <p class="font-medium text-gray-900">{{ test.name }}</p>
+                        <p class="text-sm text-gray-600 mt-1">{{ test.reason }}</p>
+                        <p class="text-xs text-orange-600 mt-2 font-medium">Every {{ test.frequency }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-8 flex justify-center">
+        <a href="{{ url_for('main.dashboard') }}" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition">
+            Return to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const bmiValue = {{ health_record.bmi }};
+const glucoseValue = {{ health_record.glucose }};
+const riskValue = {{ health_record.prediction_result * 100 }};
+
+const bmiCtx = document.getElementById('bmiChart').getContext('2d');
+new Chart(bmiCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['BMI', 'Target'],
+        datasets: [{
+            data: [bmiValue, Math.max(25 - bmiValue, 0)],
+            backgroundColor: ['#3b82f6', '#e5e7eb'],
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+
+const glucoseCtx = document.getElementById('glucoseChart').getContext('2d');
+new Chart(glucoseCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Glucose', 'Normal'],
+        datasets: [{
+            data: [glucoseValue, Math.max(100 - glucoseValue, 0)],
+            backgroundColor: glucoseValue > 125 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+
+const riskCtx = document.getElementById('riskChart').getContext('2d');
+new Chart(riskCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Risk', 'Safe'],
+        datasets: [{
+            data: [riskValue, 100 - riskValue],
+            backgroundColor: riskValue > 50 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+</script>
+{% endblock %}
