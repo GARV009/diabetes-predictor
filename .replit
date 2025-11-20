@@ -38,10 +38,6 @@ externalPort = 80
 localPort = 41231
 externalPort = 3000
 
-[[ports]]
-localPort = 46763
-externalPort = 3001
-
 [deployment]
 deploymentTarget = "autoscale"
 run = ["python", "flask/app.py"]
