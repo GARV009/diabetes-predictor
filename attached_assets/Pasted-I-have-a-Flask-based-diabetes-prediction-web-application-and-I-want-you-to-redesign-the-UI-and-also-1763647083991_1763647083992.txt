@@ -1,0 +1,219 @@
+I have a Flask-based diabetes prediction web application, and I want you to redesign the UI and also implement or fix ALL backend functionalities corresponding to every UI feature.
+
+Build a modern, responsive, production-ready UI AND ensure the backend has full logic, routes, models, utilities, and API endpoints for everything in the interface.
+
+✅ Project Functionalities to Fully Implement
+
+You must create or complete both UI and backend for:
+
+1. Diabetes Prediction Module
+
+UI:
+
+Inputs: glucose, insulin, BMI, age
+
+Result display
+
+Interactive charts (BMI bar, glucose doughnut, risk bar)
+
+Backend:
+
+Route to process prediction request
+
+Load SVC model
+
+Return prediction + risk metrics
+
+JSON endpoints for all charts
+
+2. Personalized Diet Planner
+
+UI:
+
+Daily calorie target
+
+Macro breakdown UI
+
+Meal recommendations (breakfast/lunch/dinner/snacks)
+
+Foods to avoid
+
+7-day meal schedule
+
+Personalized health tips
+
+Backend:
+
+Calorie calculator function
+
+Macro ratio generator
+
+Meal suggestion engine
+
+Food categories and avoid-list logic
+
+7-day plan generation
+
+Tip generation logic
+
+Backend API returning all values in JSON
+
+3. Health Checkup Recommendations
+
+UI:
+
+BP input + result
+
+Recommended blood tests (essential / recommended / optional)
+
+Doctor visit frequency
+
+Test frequency schedule
+
+Family history indicators
+
+Backend:
+
+BP analysis algorithm
+
+Rule-based test recommendation engine
+
+Doctor visit interval function
+
+Test scheduling logic
+
+Family history risk evaluation
+
+JSON/API endpoint to feed UI
+
+4. Interactive Visualizations (Chart.js)
+
+Build UI containers and backend data routes for:
+
+BMI bar chart
+
+Glucose doughnut chart
+
+Diabetes risk bar
+
+Nutrition breakdown pie chart
+
+Health timeline chart (glucose + BMI from DB)
+
+Backend:
+
+Endpoints returning chart data in JSON
+
+DB queries for historical data
+
+5. User Authentication + Profiles
+
+UI:
+
+Login
+
+Register
+
+Profile page
+
+Backend:
+
+Flask-Login integration
+
+Input validation
+
+Password hashing
+
+Protected routes
+
+6. Health History Dashboard
+
+UI:
+
+Table of last 10 entries
+
+Trend charts
+
+Color-coded risk status
+
+Backend:
+
+Save health records to DB
+
+Fetch recent records
+
+Risk evaluation logic
+
+History API endpoint
+
+7. Gamification System
+
+UI:
+
+Points
+
+Streaks
+
+Badges
+
+Progress section
+
+Backend:
+
+Logic for awarding points
+
+Daily streak calculation
+
+Badge assignment (5 badges)
+
+API returning gamification stats
+
+8. Chatbot Feature
+
+UI:
+
+Chatbox with user / bot messages
+
+Backend:
+
+Rule-based conversational engine
+
+Provide structured responses (diet, glucose, stress, sleep, exercise, medications)
+
+JSON endpoint to return reply
+
+✅ UI Requirements
+
+Modern medical-themed style (whites, pastel blues/greens)
+
+Fully responsive (desktop/tablet/mobile)
+
+Dashboard layout with sidebar/top-nav
+
+Clean components: cards, grids, charts, icons
+
+Tailwind, Bootstrap, or custom CSS allowed
+
+Smooth transitions & modern spacing
+
+✅ Backend Requirements
+
+Clean Flask structure (blueprints preferred)
+
+SQLAlchemy ORM
+
+Models for User, HealthRecord, Gamification
+
+All routes must validate data and return JSON or render templates
+
+Use a modular, scalable project layout
+
+Deliverables
+
+✔ Complete UI (HTML/CSS/JS) for all pages
+✔ Backend Flask routes for all UI forms
+✔ Chart.js data endpoints
+✔ Updated models, utilities, and DB logic
+✔ Fully functional user authentication
+✔ All gamification + chatbot logic implemented
+✔ Health history + recommendations + diet planner fully functional
