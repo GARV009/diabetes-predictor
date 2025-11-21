@@ -300,58 +300,97 @@
 <script>
 const bmiValue = {{ health_record.bmi }};
 const glucoseValue = {{ health_record.glucose }};
+const insulinValue = {{ health_record.insulin }};
 const riskValue = {{ health_record.prediction_result * 100 }};
 
+// BMI Chart
 const bmiCtx = document.getElementById('bmiChart').getContext('2d');
 new Chart(bmiCtx, {
     type: 'doughnut',
     data: {
-        labels: ['BMI', 'Target'],
+        labels: ['Your BMI', 'Healthy Target'],
         datasets: [{
-            data: [bmiValue, Math.max(25 - bmiValue, 0)],
+            data: [bmiValue, Math.max(25 - bmiValue, 0.1)],
             backgroundColor: ['#3b82f6', '#e5e7eb'],
+            borderColor: '#fff',
+            borderWidth: 2
         }]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: true,
         plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: { enabled: true }
         }
     }
 });
 
+// Glucose Chart
 const glucoseCtx = document.getElementById('glucoseChart').getContext('2d');
 new Chart(glucoseCtx, {
     type: 'doughnut',
     data: {
-        labels: ['Glucose', 'Normal'],
+        labels: ['Your Glucose', 'Normal Range'],
         datasets: [{
-            data: [glucoseValue, Math.max(100 - glucoseValue, 0)],
+            data: [glucoseValue, Math.max(100 - glucoseValue, 0.1)],
             backgroundColor: glucoseValue > 125 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+            borderColor: '#fff',
+            borderWidth: 2
         }]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: true,
         plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: { enabled: true }
         }
     }
 });
 
-const riskCtx = document.getElementById('riskChart').getContext('2d');
-new Chart(riskCtx, {
+// Insulin Chart
+const insulinCtx = document.getElementById('insulinChart').getContext('2d');
+new Chart(insulinCtx, {
     type: 'doughnut',
     data: {
-        labels: ['Risk', 'Safe'],
+        labels: ['Your Insulin', 'Normal Level'],
         datasets: [{
-            data: [riskValue, 100 - riskValue],
-            backgroundColor: riskValue > 50 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+            data: [insulinValue, Math.max(12 - insulinValue, 0.1)],
+            backgroundColor: insulinValue > 12 ? ['#a855f7', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+            borderColor: '#fff',
+            borderWidth: 2
         }]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: true,
         plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: { enabled: true }
+        }
+    }
+});
+
+// Risk Chart
+const riskCtx = document.getElementById('riskChart').getContext('2d');
+new Chart(riskCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Risk Level', 'Safe Zone'],
+        datasets: [{
+            data: [riskValue, 100 - riskValue],
+            backgroundColor: riskValue > 50 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+            borderColor: '#fff',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true }
         }
     }
 });
