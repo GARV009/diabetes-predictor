@@ -35,18 +35,17 @@ def prediction_form():
 def predict():
     pregnancies = float(request.form.get('pregnancies', 0))
     glucose = float(request.form.get('glucose'))
-    bp_systolic = float(request.form.get('bp_systolic'))
+    blood_pressure = float(request.form.get('blood_pressure'))
     skin_thickness = float(request.form.get('skin_thickness', 0))
     insulin = float(request.form.get('insulin'))
     bmi = float(request.form.get('bmi'))
     dpf = float(request.form.get('dpf', 0.5))
     age = float(request.form.get('age'))
-    bp_diastolic = float(request.form.get('bp_diastolic'))
     family_history = request.form.get('family_history') == 'yes'
     
     # Prepare features for model (all 8 features in correct order)
     # Order: Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age
-    float_features = [pregnancies, glucose, bp_systolic, skin_thickness, insulin, bmi, dpf, age]
+    float_features = [pregnancies, glucose, blood_pressure, skin_thickness, insulin, bmi, dpf, age]
     final_features = [np.array(float_features)]
     
     # Scale features
@@ -85,8 +84,8 @@ def predict():
         insulin=float(insulin),
         bmi=float(bmi),
         age=int(age),
-        bp_systolic=float(bp_systolic),
-        bp_diastolic=float(bp_diastolic),
+        bp_systolic=float(blood_pressure),
+        bp_diastolic=float(blood_pressure),
         family_history=bool(family_history),
         prediction_result=float(risk_score / 100),  # Store as decimal (0-1)
         risk_level=str(risk_level)
@@ -104,8 +103,7 @@ def predict():
             'insulin': float(insulin),
             'bmi': float(bmi),
             'age': float(age),
-            'bp_systolic': float(bp_systolic),
-            'bp_diastolic': float(bp_diastolic)
+            'blood_pressure': float(blood_pressure)
         }
     )
     
@@ -122,7 +120,7 @@ def predict():
     # Generate personalized plans
     diet_plan = generate_diet_plan(glucose, insulin, bmi, age, pred_value)
     checkup_plan = generate_health_checkup_plan(
-        age, bmi, glucose, bp_systolic, bp_diastolic, 
+        age, bmi, glucose, blood_pressure, blood_pressure, 
         pred_value, family_history
     )
     
@@ -135,15 +133,14 @@ def predict():
     
     insulin_status = "✅ Normal" if insulin < 12 else "⚠️ Elevated" if insulin < 20 else "🔴 High"
     
-    bp_category = "Normal" if bp_systolic < 120 and bp_diastolic < 80 else "Elevated" if bp_systolic < 130 and bp_diastolic < 80 else "High Stage 1" if bp_systolic < 140 or bp_diastolic < 90 else "High Stage 2"
-    bp_status = "✅ Normal" if bp_systolic < 120 else "⚠️ Elevated" if bp_systolic < 140 else "🔴 High"
+    bp_category = "Normal" if blood_pressure < 120 else "Elevated" if blood_pressure < 130 else "High Stage 1" if blood_pressure < 140 else "High Stage 2"
+    bp_status = "✅ Normal" if blood_pressure < 120 else "⚠️ Elevated" if blood_pressure < 140 else "🔴 High"
     
     # Calculate health score (0-100)
     health_score = 0
     glucose = float(glucose)
     bmi = float(bmi)
     insulin = float(insulin)
-    bp_systolic = float(bp_systolic)
     if bmi < 25:
         health_score += 25
     elif bmi < 30:
@@ -165,9 +162,9 @@ def predict():
     else:
         health_score += 3
     
-    if bp_systolic < 120:
+    if blood_pressure < 120:
         health_score += 30
-    elif bp_systolic < 140:
+    elif blood_pressure < 140:
         health_score += 15
     else:
         health_score += 5
@@ -198,13 +195,12 @@ def predict():
             'recommendation': 'Normal fasting insulin is below 12 μU/mL' if insulin >= 12 else 'Insulin level is optimal!'
         },
         'blood_pressure': {
-            'systolic': bp_systolic,
-            'diastolic': bp_diastolic,
+            'value': blood_pressure,
             'category': bp_category,
             'status': bp_status,
-            'normal_range': '<120/<80',
+            'normal_range': '<120',
             'description': 'Blood pressure - force of blood against artery walls',
-            'recommendation': 'Maintain below 120/80 mmHg' if bp_systolic >= 120 else 'Your BP is in excellent range!'
+            'recommendation': 'Maintain below 120 mmHg' if blood_pressure >= 120 else 'Your BP is in excellent range!'
         }
     }
     
