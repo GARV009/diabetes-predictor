@@ -77,11 +77,90 @@ def predict():
         pred_value, family_history
     )
     
+    # Calculate health metrics analysis
+    bmi_category = "Underweight" if bmi < 18.5 else "Normal Weight" if bmi < 25 else "Overweight" if bmi < 30 else "Obese"
+    bmi_status = "✅ Healthy" if bmi < 25 else "⚠️ Needs Attention" if bmi < 30 else "🔴 At Risk"
+    
+    glucose_category = "Normal" if glucose < 100 else "Prediabetes" if glucose < 126 else "Diabetes"
+    glucose_status = "✅ Normal" if glucose < 100 else "⚠️ Prediabetes" if glucose < 126 else "🔴 High"
+    
+    insulin_status = "✅ Normal" if insulin < 12 else "⚠️ Elevated" if insulin < 20 else "🔴 High"
+    
+    bp_category = "Normal" if bp_systolic < 120 and bp_diastolic < 80 else "Elevated" if bp_systolic < 130 and bp_diastolic < 80 else "High Stage 1" if bp_systolic < 140 or bp_diastolic < 90 else "High Stage 2"
+    bp_status = "✅ Normal" if bp_systolic < 120 else "⚠️ Elevated" if bp_systolic < 140 else "🔴 High"
+    
+    health_score = 0
+    if bmi < 25:
+        health_score += 25
+    elif bmi < 30:
+        health_score += 15
+    else:
+        health_score += 5
+    
+    if glucose < 100:
+        health_score += 25
+    elif glucose < 126:
+        health_score += 15
+    else:
+        health_score += 5
+    
+    if insulin < 12:
+        health_score += 20
+    elif insulin < 20:
+        health_score += 10
+    else:
+        health_score += 3
+    
+    if bp_systolic < 120:
+        health_score += 30
+    elif bp_systolic < 140:
+        health_score += 15
+    else:
+        health_score += 5
+    
+    health_metrics = {
+        'bmi': {
+            'value': bmi,
+            'category': bmi_category,
+            'status': bmi_status,
+            'min_healthy': 18.5,
+            'max_healthy': 24.9,
+            'description': 'Body Mass Index - measures your weight relative to height',
+            'recommendation': 'Aim for BMI between 18.5-24.9' if bmi >= 25 else 'Keep up the good work!'
+        },
+        'glucose': {
+            'value': glucose,
+            'category': glucose_category,
+            'status': glucose_status,
+            'normal_range': '70-100',
+            'description': 'Blood glucose level - key indicator of diabetes risk',
+            'recommendation': 'Values below 100 mg/dL are ideal' if glucose >= 100 else 'Your glucose level is healthy!'
+        },
+        'insulin': {
+            'value': insulin,
+            'status': insulin_status,
+            'normal_range': '2-12',
+            'description': 'Insulin level - hormone that regulates blood sugar',
+            'recommendation': 'Normal fasting insulin is below 12 μU/mL' if insulin >= 12 else 'Insulin level is optimal!'
+        },
+        'blood_pressure': {
+            'systolic': bp_systolic,
+            'diastolic': bp_diastolic,
+            'category': bp_category,
+            'status': bp_status,
+            'normal_range': '<120/<80',
+            'description': 'Blood pressure - force of blood against artery walls',
+            'recommendation': 'Maintain below 120/80 mmHg' if bp_systolic >= 120 else 'Your BP is in excellent range!'
+        }
+    }
+    
     return render_template('prediction/results.html',
                          prediction_text=prediction_text,
                          diet_plan=diet_plan,
                          checkup_plan=checkup_plan,
-                         health_record=health_record)
+                         health_record=health_record,
+                         health_metrics=health_metrics,
+                         health_score=health_score)
 
 @prediction_bp.route('/chart-data/<int:record_id>', methods=['GET'])
 @login_required
