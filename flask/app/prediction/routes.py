@@ -33,16 +33,20 @@ def prediction_form():
 @prediction_bp.route('/predict', methods=['POST'])
 @login_required
 def predict():
+    pregnancies = float(request.form.get('pregnancies', 0))
     glucose = float(request.form.get('glucose'))
+    bp_systolic = float(request.form.get('bp_systolic'))
+    skin_thickness = float(request.form.get('skin_thickness', 0))
     insulin = float(request.form.get('insulin'))
     bmi = float(request.form.get('bmi'))
+    dpf = float(request.form.get('dpf', 0.5))
     age = float(request.form.get('age'))
-    bp_systolic = float(request.form.get('bp_systolic'))
     bp_diastolic = float(request.form.get('bp_diastolic'))
     family_history = request.form.get('family_history') == 'yes'
     
-    # Prepare features for model
-    float_features = [glucose, insulin, bmi, age]
+    # Prepare features for model (all 8 features in correct order)
+    # Order: Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age
+    float_features = [pregnancies, glucose, bp_systolic, skin_thickness, insulin, bmi, dpf, age]
     final_features = [np.array(float_features)]
     
     # Scale features
