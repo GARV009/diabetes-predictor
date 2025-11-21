@@ -95,11 +95,12 @@
 
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
                 <label class="flex items-start cursor-pointer">
-                    <input type="checkbox" name="family_history" value="yes"
-                           class="mt-1 h-5 w-5 text-medical-blue-600 rounded focus:ring-medical-blue-500 border-gray-300">
+                    <input type="checkbox" id="familyHistoryCheck" name="family_history" value="yes"
+                           class="mt-1 h-5 w-5 text-medical-blue-600 rounded focus:ring-medical-blue-500 border-gray-300"
+                           onchange="updateDPFFromFamilyHistory()">
                     <div class="ml-3">
                         <span class="text-sm font-medium text-gray-900 dark:text-white">I have a family history of diabetes</span>
-                        <p class="text-xs text-gray-600 mt-1">This helps us provide more accurate recommendations</p>
+                        <p class="text-xs text-gray-600 mt-1">This automatically increases the family history factor in risk calculation</p>
                     </div>
                 </label>
             </div>
@@ -112,6 +113,23 @@
             </div>
         </form>
     </div>
+
+    <script>
+        function updateDPFFromFamilyHistory() {
+            const familyHistoryCheck = document.getElementById('familyHistoryCheck');
+            const dpfInput = document.getElementById('dpf');
+            
+            if (familyHistoryCheck.checked) {
+                // If family history is checked, set DPF to a higher value (0.8)
+                dpfInput.value = 0.8;
+                dpfInput.title = 'Higher value due to family history of diabetes';
+            } else {
+                // If unchecked, reset to average value (0.5)
+                dpfInput.value = 0.5;
+                dpfInput.title = 'Family history factor (0-2.0). Average is ~0.5';
+            }
+        }
+    </script>
 
     <div class="mt-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
         <h3 class="text-lg font-semibold text-gray-900 mb-2">What You'll Get:</h3>
