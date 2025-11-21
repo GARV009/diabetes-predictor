@@ -155,9 +155,9 @@ print(f"\n✅ BEST MODEL: {best_model_name} (Accuracy: {best_accuracy:.4f})")
 
 # Step 8: Save model and scaler
 print("\n💾 Saving model and scaler...")
-model_path = 'flask/model_merged.pkl'
-scaler_path = 'flask/scaler_merged.pkl'
-metadata_path = 'flask/model_metadata.pkl'
+model_path = 'model_merged.pkl'
+scaler_path = 'scaler_merged.pkl'
+metadata_path = 'model_metadata.pkl'
 
 joblib.dump(best_model, model_path)
 joblib.dump(scaler, scaler_path)

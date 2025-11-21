@@ -6,18 +6,24 @@ import numpy as np
 import joblib
 from app.utils.diet_planner import generate_diet_plan
 from app.utils.health_checkup import generate_health_checkup_plan
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import os
+from rl_feedback_system import rl_system
 
-model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'model.pkl')
-dataset_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'diabetes.csv')
+# Load new merged model and scaler
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+model_path = os.path.join(base_path, 'model_merged.pkl')
+scaler_path = os.path.join(base_path, 'scaler_merged.pkl')
 
-model = joblib.load(model_path)
-dataset = pd.read_csv(dataset_path)
-dataset_X = dataset.iloc[:,[1, 2, 5, 7]].values
-sc = MinMaxScaler(feature_range = (0,1))
-dataset_scaled = sc.fit_transform(dataset_X)
+try:
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
+    print("✓ Loaded merged model and scaler for probability-based predictions")
+except Exception as e:
+    print(f"⚠ Could not load merged model: {e}. Falling back to old model.")
+    model = joblib.load(os.path.join(base_path, 'model.pkl'))
+    scaler = StandardScaler()
 
 @prediction_bp.route('/', methods=['GET'])
 @login_required
@@ -35,12 +41,31 @@ def predict():
     bp_diastolic = float(request.form.get('bp_diastolic'))
     family_history = request.form.get('family_history') == 'yes'
     
+    # Prepare features for model
     float_features = [glucose, insulin, bmi, age]
     final_features = [np.array(float_features)]
-    prediction = model.predict(sc.transform(final_features))
     
-    pred_value = int(prediction[0])
+    # Scale features
+    scaled_features = scaler.transform(final_features)
     
+    # Get probability-based prediction (0-100%)
+    try:
+        prediction_proba = model.predict_proba(scaled_features)[0]
+        diabetes_probability = prediction_proba[1] * 100  # Probability of diabetes class
+        
+        # Apply RL-based adjustment to risk score
+        risk_score = rl_system.adjust_risk_score(diabetes_probability)
+        
+        # Convert probability to binary prediction for classification
+        pred_value = 1 if risk_score >= 50 else 0
+    except Exception as e:
+        print(f"Probability prediction error: {e}")
+        # Fallback to binary prediction
+        prediction = model.predict(scaled_features)
+        pred_value = int(prediction[0])
+        risk_score = 100 if pred_value == 1 else 0
+    
+    # Determine prediction text and risk level
     if pred_value == 1:
         prediction_text = "You have Diabetes, please consult a Doctor."
         risk_level = "High"
@@ -48,6 +73,7 @@ def predict():
         prediction_text = "You don't have Diabetes."
         risk_level = "Low"
     
+    # Create health record with probability-based risk score
     health_record = HealthRecord(
         user_id=current_user.id,
         glucose=glucose,
@@ -57,11 +83,27 @@ def predict():
         bp_systolic=bp_systolic,
         bp_diastolic=bp_diastolic,
         family_history=family_history,
-        prediction_result=pred_value,
+        prediction_result=risk_score / 100,  # Store as decimal (0-1)
         risk_level=risk_level
     )
     db.session.add(health_record)
     
+    # Record prediction for RL feedback system
+    prediction_data = rl_system.record_prediction(
+        user_id=current_user.id,
+        prediction_prob=risk_score / 100,
+        predicted_label=pred_value,
+        actual_features={
+            'glucose': glucose,
+            'insulin': insulin,
+            'bmi': bmi,
+            'age': age,
+            'bp_systolic': bp_systolic,
+            'bp_diastolic': bp_diastolic
+        }
+    )
+    
+    # Update gamification
     gamification = Gamification.query.filter_by(user_id=current_user.id).first()
     if gamification:
         gamification.predictions_count += 1
@@ -71,13 +113,14 @@ def predict():
     
     db.session.commit()
     
+    # Generate personalized plans
     diet_plan = generate_diet_plan(glucose, insulin, bmi, age, pred_value)
     checkup_plan = generate_health_checkup_plan(
         age, bmi, glucose, bp_systolic, bp_diastolic, 
         pred_value, family_history
     )
     
-    # Calculate health metrics analysis
+    # Calculate detailed health metrics analysis
     bmi_category = "Underweight" if bmi < 18.5 else "Normal Weight" if bmi < 25 else "Overweight" if bmi < 30 else "Obese"
     bmi_status = "✅ Healthy" if bmi < 25 else "⚠️ Needs Attention" if bmi < 30 else "🔴 At Risk"
     
@@ -89,6 +132,7 @@ def predict():
     bp_category = "Normal" if bp_systolic < 120 and bp_diastolic < 80 else "Elevated" if bp_systolic < 130 and bp_diastolic < 80 else "High Stage 1" if bp_systolic < 140 or bp_diastolic < 90 else "High Stage 2"
     bp_status = "✅ Normal" if bp_systolic < 120 else "⚠️ Elevated" if bp_systolic < 140 else "🔴 High"
     
+    # Calculate health score (0-100)
     health_score = 0
     if bmi < 25:
         health_score += 25
@@ -160,7 +204,61 @@ def predict():
                          checkup_plan=checkup_plan,
                          health_record=health_record,
                          health_metrics=health_metrics,
-                         health_score=health_score)
+                         health_score=health_score,
+                         risk_score=risk_score,
+                         prediction_data=prediction_data)
+
+@prediction_bp.route('/feedback/<int:record_id>', methods=['POST'])
+@login_required
+def submit_feedback(record_id):
+    """
+    Submit feedback on whether prediction was accurate
+    Users can report if they got diagnosed or if prediction was wrong
+    """
+    record = HealthRecord.query.get_or_404(record_id)
+    
+    if record.user_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    actual_outcome = request.json.get('actual_outcome')  # 0 or 1
+    
+    if actual_outcome not in [0, 1]:
+        return jsonify({'error': 'Invalid outcome'}), 400
+    
+    # Get stored prediction data
+    prediction_data = {
+        'user_id': record.user_id,
+        'prediction_prob': float(record.prediction_result),
+        'predicted_label': 1 if record.risk_level == 'High' else 0,
+        'timestamp': record.created_at.isoformat(),
+        'features': {
+            'glucose': float(record.glucose),
+            'insulin': float(record.insulin),
+            'bmi': float(record.bmi),
+            'age': float(record.age),
+            'bp_systolic': float(record.bp_systolic),
+            'bp_diastolic': float(record.bp_diastolic)
+        }
+    }
+    
+    # Record feedback in RL system
+    rl_system.record_feedback(prediction_data, actual_outcome)
+    
+    # Get updated stats
+    stats = rl_system.get_feedback_stats()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Feedback recorded successfully',
+        'rl_stats': stats
+    })
+
+@prediction_bp.route('/rl-stats', methods=['GET'])
+@login_required
+def get_rl_stats():
+    """Get RL feedback system statistics"""
+    stats = rl_system.get_feedback_stats()
+    return jsonify(stats)
 
 @prediction_bp.route('/chart-data/<int:record_id>', methods=['GET'])
 @login_required
@@ -169,6 +267,9 @@ def get_chart_data(record_id):
     
     if record.user_id != current_user.id:
         return jsonify({'error': 'Unauthorized'}), 403
+    
+    # Use probability-based risk score (0-100)
+    risk_value = record.prediction_result * 100
     
     chart_data = {
         'bmi': {
@@ -180,7 +281,7 @@ def get_chart_data(record_id):
             'category': 'Normal' if record.glucose < 100 else 'Prediabetes' if record.glucose < 126 else 'Diabetes'
         },
         'risk': {
-            'value': record.prediction_result * 100,
+            'value': risk_value,
             'level': record.risk_level
         }
     }
