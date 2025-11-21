@@ -3,13 +3,15 @@
 {% block title %}Health Statistics - Health Manager{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="max-w-7xl mx-auto">
     <div class="mb-8">
         <a href="{{ url_for('profile.settings') }}" class="text-medical-blue-600 hover:text-medical-blue-700 font-medium">
             ← Back to Settings
         </a>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mt-4">Your Health Statistics</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">Overview of your health metrics and achievements</p>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Comprehensive overview of your health metrics, trends, and achievements</p>
     </div>
 
     <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white mb-8">
@@ -26,67 +28,108 @@
     </div>
 
     {% if records %}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+    <!-- Key Metrics Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Total Checkups</p>
-                    <p class="text-3xl font-bold text-medical-blue-600 mt-1">{{ records|length }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 uppercase">Checkups</p>
+                    <p class="text-2xl font-bold text-medical-blue-600 mt-1">{{ records|length }}</p>
                 </div>
-                <div class="h-12 w-12 bg-medical-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="h-6 w-6 text-medical-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
+                <svg class="h-8 w-8 text-medical-blue-200" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H3a1 1 0 00-1 1v12a1 1 0 001 1h14a1 1 0 001-1V6a1 1 0 00-1-1h3a1 1 0 000-2h-1V3a1 1 0 10-2 0v2H7V3a1 1 0 00-2 0v2H4z" clip-rule="evenodd"></path></svg>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Average Glucose</p>
-                    <p class="text-3xl font-bold text-orange-600 mt-1">{{ "%.0f"|format(avg_glucose) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">mg/dL</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 uppercase">Avg Glucose</p>
+                    <p class="text-2xl font-bold text-orange-600 mt-1">{{ "%.0f"|format(avg_glucose) }}</p>
+                    <p class="text-xs text-gray-500">{{ "%.0f"|format(min_glucose) }}-{{ "%.0f"|format(max_glucose) }}</p>
                 </div>
-                <div class="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
+                <svg class="h-8 w-8 text-orange-200" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v4h8v-4zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
                 </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-700 dark:bg-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 uppercase">Avg BMI</p>
+                    <p class="text-2xl font-bold text-green-600 mt-1">{{ "%.1f"|format(avg_bmi) }}</p>
+                    <p class="text-xs text-gray-500">{{ "%.1f"|format(min_bmi) }}-{{ "%.1f"|format(max_bmi) }}</p>
+                </div>
+                <svg class="h-8 w-8 text-green-200" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Average BMI</p>
-                    <p class="text-3xl font-bold text-green-600 mt-1">{{ "%.1f"|format(avg_bmi) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        {% if avg_bmi < 18.5 %}Underweight{% elif avg_bmi < 25 %}Healthy{% elif avg_bmi < 30 %}Overweight{% else %}Obese{% endif %}
-                    </p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 uppercase">Avg Insulin</p>
+                    <p class="text-2xl font-bold text-purple-600 mt-1">{{ "%.1f"|format(avg_insulin) }}</p>
+                    <p class="text-xs text-gray-500">μU/mL</p>
                 </div>
-                <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg class="h-6 w-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
+                <svg class="h-8 w-8 text-purple-200" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">High Risk Cases</p>
-                    <p class="text-3xl font-bold text-red-600 mt-1">{{ high_risk_count }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                        {% if high_risk_count == 0 %}All Clear! 🎉{% else %}{{ (high_risk_count / records|length * 100)|int }}% of checks{% endif %}
-                    </p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 uppercase">BP Status</p>
+                    <p class="text-2xl font-bold text-red-600 mt-1">{{ "%.0f"|format(avg_bp_systolic) }}/{{ "%.0f"|format(avg_bp_diastolic) }}</p>
+                    <p class="text-xs text-gray-500">mmHg</p>
                 </div>
-                <div class="h-12 w-12 bg-red-100 rounded-lg flex items-center justify-center">
-                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+                <svg class="h-8 w-8 text-red-200" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl shadow-sm p-6 border border-green-200 dark:border-green-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-green-800 dark:text-green-200 font-medium">Healthy Status</p>
+                    <p class="text-3xl font-bold text-green-600 mt-2">{{ low_risk_count }}</p>
+                    <p class="text-xs text-green-700 dark:text-green-300 mt-1">{{ "%.0f"|format(low_risk_count / records|length * 100) }}% of checkups</p>
                 </div>
+                <svg class="h-12 w-12 text-green-200" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900 dark:to-red-800 rounded-xl shadow-sm p-6 border border-red-200 dark:border-red-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-red-800 dark:text-red-200 font-medium">At Risk Status</p>
+                    <p class="text-3xl font-bold text-red-600 mt-2">{{ high_risk_count }}</p>
+                    <p class="text-xs text-red-700 dark:text-red-300 mt-1">{{ "%.0f"|format(high_risk_count / records|length * 100) }}% of checkups</p>
+                </div>
+                <svg class="h-12 w-12 text-red-200" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zm-11-1a1 1 0 11-2 0 1 1 0 012 0zM8 7a1 1 0 000 2h4a1 1 0 100-2H8zm4 4a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-xl shadow-sm p-6 border border-blue-200 dark:border-blue-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-blue-800 dark:text-blue-200 font-medium">Trend Analysis</p>
+                    {% if glucose_data|length > 1 %}
+                        {% if glucose_data[-1] > glucose_data[0] %}
+                            <p class="text-lg font-semibold text-red-600 mt-2">↗ Increasing</p>
+                            <p class="text-xs text-red-700 dark:text-red-300 mt-1">Recent trend up</p>
+                        {% elif glucose_data[-1] < glucose_data[0] %}
+                            <p class="text-lg font-semibold text-green-600 mt-2">↘ Improving</p>
+                            <p class="text-xs text-green-700 dark:text-green-300 mt-1">Recent trend down</p>
+                        {% else %}
+                            <p class="text-lg font-semibold text-gray-600 mt-2">→ Stable</p>
+                            <p class="text-xs text-gray-700 dark:text-gray-300 mt-1">No significant change</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-lg font-semibold text-blue-600 mt-2">—</p>
+                        <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">Need more data</p>
+                    {% endif %}
+                </div>
+                <svg class="h-12 w-12 text-blue-200" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
             </div>
         </div>
     </div>
@@ -134,36 +177,211 @@
     </div>
     {% endif %}
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">📊 Recent Checkups</h2>
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Glucose Trend Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📈 Glucose Levels Trend</h3>
+            <canvas id="glucoseChart"></canvas>
+            <script>
+                const glucoseCtx = document.getElementById('glucoseChart').getContext('2d');
+                new Chart(glucoseCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ chart_labels | tojson }},
+                        datasets: [{
+                            label: 'Glucose (mg/dL)',
+                            data: {{ glucose_data | tojson }},
+                            borderColor: '#FB923C',
+                            backgroundColor: 'rgba(251, 146, 60, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#FB923C',
+                            pointBorderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: { color: '#6B7280' }
+                            },
+                            x: {
+                                ticks: { color: '#6B7280' }
+                            }
+                        }
+                    }
+                });
+            </script>
+        </div>
+
+        <!-- BMI Trend Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">⚖️ BMI Trend</h3>
+            <canvas id="bmiChart"></canvas>
+            <script>
+                const bmiCtx = document.getElementById('bmiChart').getContext('2d');
+                new Chart(bmiCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ chart_labels | tojson }},
+                        datasets: [{
+                            label: 'BMI',
+                            data: {{ bmi_data | tojson }},
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#10B981',
+                            pointBorderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: { color: '#6B7280' }
+                            },
+                            x: {
+                                ticks: { color: '#6B7280' }
+                            }
+                        }
+                    }
+                });
+            </script>
+        </div>
+
+        <!-- Blood Pressure Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🩺 Blood Pressure Trend</h3>
+            <canvas id="bpChart"></canvas>
+            <script>
+                const bpCtx = document.getElementById('bpChart').getContext('2d');
+                new Chart(bpCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ chart_labels | tojson }},
+                        datasets: [
+                            {
+                                label: 'Systolic (mmHg)',
+                                data: {{ bp_systolic_data | tojson }},
+                                borderColor: '#EF4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                tension: 0.4,
+                                pointRadius: 3,
+                                pointBackgroundColor: '#EF4444'
+                            },
+                            {
+                                label: 'Diastolic (mmHg)',
+                                data: {{ bp_diastolic_data | tojson }},
+                                borderColor: '#3B82F6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4,
+                                pointRadius: 3,
+                                pointBackgroundColor: '#3B82F6'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { 
+                                display: true,
+                                labels: { color: '#6B7280' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: { color: '#6B7280' }
+                            },
+                            x: {
+                                ticks: { color: '#6B7280' }
+                            }
+                        }
+                    }
+                });
+            </script>
+        </div>
+
+        <!-- Risk Distribution -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🎯 Health Status Distribution</h3>
+            <canvas id="riskChart"></canvas>
+            <script>
+                const riskCtx = document.getElementById('riskChart').getContext('2d');
+                new Chart(riskCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Healthy', 'At Risk'],
+                        datasets: [{
+                            data: [{{ low_risk_count }}, {{ high_risk_count }}],
+                            backgroundColor: ['#10B981', '#EF4444'],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { 
+                                labels: { color: '#6B7280' }
+                            }
+                        }
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 mb-8">
+        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">📊 Detailed Health Records</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Glucose</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Insulin</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">BMI</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Age</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Risk</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">BP</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    {% for record in records[:10] %}
+                    {% for record in records[:15] %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-800">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                             {{ record.created_at.strftime('%b %d, %Y') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                            {{ record.glucose }}
+                            {{ "%.0f"|format(record.glucose) }} mg/dL
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            {{ record.bmi }}
+                            {{ "%.1f"|format(record.insulin) }} μU/mL
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            {{ record.age }}
+                            {{ "%.1f"|format(record.bmi) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            {{ record.bp_systolic }}/{{ record.bp_diastolic }} mmHg
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-3 py-1 text-xs font-semibold rounded-full {% if record.risk_level == 'High' %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full {% if record.risk_level == 'High' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200{% else %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% endif %}">
                                 {{ record.risk_level }}
                             </span>
                         </td>

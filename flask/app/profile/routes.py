@@ -44,24 +44,77 @@ def settings():
 @profile_bp.route('/health-stats', methods=['GET'])
 @login_required
 def health_stats():
-    records = HealthRecord.query.filter_by(user_id=current_user.id).order_by(HealthRecord.created_at.desc()).all()
+    records = HealthRecord.query.filter_by(user_id=current_user.id).order_by(HealthRecord.created_at.asc()).all()
     gamification = Gamification.query.filter_by(user_id=current_user.id).first()
     
     avg_glucose = None
     avg_bmi = None
+    avg_insulin = None
+    avg_bp_systolic = None
+    avg_bp_diastolic = None
     high_risk_count = 0
+    low_risk_count = 0
+    
+    min_glucose = None
+    max_glucose = None
+    min_bmi = None
+    max_bmi = None
     
     if records:
-        avg_glucose = sum(r.glucose for r in records) / len(records)
-        avg_bmi = sum(r.bmi for r in records) / len(records)
+        glucoses = [r.glucose for r in records]
+        bmis = [r.bmi for r in records]
+        insulins = [r.insulin for r in records]
+        bp_systolics = [r.bp_systolic for r in records]
+        bp_diastolics = [r.bp_diastolic for r in records]
+        
+        avg_glucose = sum(glucoses) / len(glucoses)
+        avg_bmi = sum(bmis) / len(bmis)
+        avg_insulin = sum(insulins) / len(insulins)
+        avg_bp_systolic = sum(bp_systolics) / len(bp_systolics)
+        avg_bp_diastolic = sum(bp_diastolics) / len(bp_diastolics)
+        
+        min_glucose = min(glucoses)
+        max_glucose = max(glucoses)
+        min_bmi = min(bmis)
+        max_bmi = max(bmis)
+        
         high_risk_count = sum(1 for r in records if r.risk_level == 'High')
+        low_risk_count = sum(1 for r in records if r.risk_level == 'Low')
+    
+    # Prepare chart data
+    chart_labels = [r.created_at.strftime('%b %d') for r in records]
+    glucose_data = [r.glucose for r in records]
+    bmi_data = [r.bmi for r in records]
+    insulin_data = [r.insulin for r in records]
+    bp_systolic_data = [r.bp_systolic for r in records]
+    bp_diastolic_data = [r.bp_diastolic for r in records]
+    
+    risk_distribution = {
+        'High': high_risk_count,
+        'Low': low_risk_count
+    }
     
     return render_template('profile/health_stats.html',
                          records=records,
                          gamification=gamification,
                          avg_glucose=avg_glucose,
                          avg_bmi=avg_bmi,
-                         high_risk_count=high_risk_count)
+                         avg_insulin=avg_insulin,
+                         avg_bp_systolic=avg_bp_systolic,
+                         avg_bp_diastolic=avg_bp_diastolic,
+                         min_glucose=min_glucose,
+                         max_glucose=max_glucose,
+                         min_bmi=min_bmi,
+                         max_bmi=max_bmi,
+                         high_risk_count=high_risk_count,
+                         low_risk_count=low_risk_count,
+                         chart_labels=chart_labels,
+                         glucose_data=glucose_data,
+                         bmi_data=bmi_data,
+                         insulin_data=insulin_data,
+                         bp_systolic_data=bp_systolic_data,
+                         bp_diastolic_data=bp_diastolic_data,
+                         risk_distribution=risk_distribution)
 
 @profile_bp.route('/download-report', methods=['GET'])
 @login_required
