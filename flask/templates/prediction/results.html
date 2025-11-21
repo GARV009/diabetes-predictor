@@ -73,7 +73,7 @@
                 <p class="text-xs font-medium text-orange-900 dark:text-orange-100">{{ health_metrics.glucose.status }}</p>
                 <p class="text-xs text-orange-700 dark:text-orange-200 mt-1">{{ health_metrics.glucose.description }}</p>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Normal range: {{ health_metrics.glucose.normal_range }} mg/dL</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Normal: {{ health_metrics.glucose.normal_range }} mg/dL</p>
         </div>
 
         <!-- Insulin Card -->
@@ -83,210 +83,92 @@
                 <span class="text-2xl">💉</span>
             </div>
             <p class="text-3xl font-bold text-purple-600 mb-1">{{ "%.1f"|format(health_record.insulin) }} μU/mL</p>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Fasting Level</p>
             <div class="bg-purple-50 dark:bg-purple-900 rounded-lg p-3 mb-3">
                 <p class="text-xs font-medium text-purple-900 dark:text-purple-100">{{ health_metrics.insulin.status }}</p>
                 <p class="text-xs text-purple-700 dark:text-purple-200 mt-1">{{ health_metrics.insulin.description }}</p>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Normal range: {{ health_metrics.insulin.normal_range }} μU/mL</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Normal: {{ health_metrics.insulin.normal_range }} μU/mL</p>
         </div>
 
         <!-- Blood Pressure Card -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Blood Pressure</h3>
-                <span class="text-2xl">🩺</span>
+                <span class="text-2xl">❤️</span>
             </div>
-            <p class="text-3xl font-bold text-red-600 mb-1">{{ health_metrics.blood_pressure.systolic }}/{{ health_metrics.blood_pressure.diastolic }} mmHg</p>
+            <p class="text-3xl font-bold text-red-600 mb-1">{{ "%.0f"|format(health_record.bp_systolic) }} mmHg</p>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ health_metrics.blood_pressure.category }}</p>
             <div class="bg-red-50 dark:bg-red-900 rounded-lg p-3 mb-3">
                 <p class="text-xs font-medium text-red-900 dark:text-red-100">{{ health_metrics.blood_pressure.status }}</p>
                 <p class="text-xs text-red-700 dark:text-red-200 mt-1">{{ health_metrics.blood_pressure.description }}</p>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Normal range: {{ health_metrics.blood_pressure.normal_range }} mmHg</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ health_metrics.blood_pressure.recommendation }}</p>
         </div>
     </div>
 
-    <!-- Health Metrics Visualization Charts -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 border border-gray-100 dark:border-gray-700 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 Health Metrics Visualization</h2>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">Interactive charts showing your health metrics compared to healthy reference ranges</p>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- BMI Gauge Chart -->
-            <div>
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-lg p-4 mb-3">
-                    <canvas id="bmiChart" height="120"></canvas>
-                </div>
-                <div class="text-center">
-                    <p class="font-semibold text-gray-900 dark:text-white">BMI Status</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Body Mass Index</p>
-                </div>
+    <!-- Health Metric Charts Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">BMI Analysis</h3>
+            <div class="flex justify-center">
+                <canvas id="bmiChart" style="max-height: 250px;"></canvas>
             </div>
+        </div>
 
-            <!-- Glucose Gauge Chart -->
-            <div>
-                <div class="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900 dark:to-orange-800 rounded-lg p-4 mb-3">
-                    <canvas id="glucoseChart" height="120"></canvas>
-                </div>
-                <div class="text-center">
-                    <p class="font-semibold text-gray-900 dark:text-white">Glucose Level</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Blood Sugar Control</p>
-                </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Glucose Levels</h3>
+            <div class="flex justify-center">
+                <canvas id="glucoseChart" style="max-height: 250px;"></canvas>
             </div>
+        </div>
 
-            <!-- Insulin Gauge Chart -->
-            <div>
-                <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 rounded-lg p-4 mb-3">
-                    <canvas id="insulinChart" height="120"></canvas>
-                </div>
-                <div class="text-center">
-                    <p class="font-semibold text-gray-900 dark:text-white">Insulin Level</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Hormone Response</p>
-                </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Insulin Levels</h3>
+            <div class="flex justify-center">
+                <canvas id="insulinChart" style="max-height: 250px;"></canvas>
             </div>
+        </div>
 
-            <!-- Overall Risk Chart -->
-            <div>
-                <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-lg p-4 mb-3">
-                    <canvas id="riskChart" height="120"></canvas>
-                </div>
-                <div class="text-center">
-                    <p class="font-semibold text-gray-900 dark:text-white">Risk Assessment</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Diabetes Risk Level</p>
-                </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Diabetes Risk</h3>
+            <div class="flex justify-center">
+                <canvas id="riskChart" style="max-height: 250px;"></canvas>
             </div>
         </div>
     </div>
 
-    {% if diet_plan %}
-    <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-            <span class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                🥗
-            </span>
-            Your Personalized Diet Plan
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-6 border border-green-100">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Daily Calorie Target</h3>
-                <p class="text-4xl font-bold text-green-600">{{ diet_plan.daily_calories }}</p>
-                <p class="text-gray-600 mt-1">calories per day</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-100">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Macronutrient Breakdown</h3>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Carbohydrates</span>
-                        <span class="font-semibold">{{ diet_plan.macronutrients.carbohydrates }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Protein</span>
-                        <span class="font-semibold">{{ diet_plan.macronutrients.protein }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Healthy Fats</span>
-                        <span class="font-semibold">{{ diet_plan.macronutrients.healthy_fats }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <p class="text-sm text-gray-700">💡 <strong>Tip:</strong> {{ diet_plan.macronutrients.details }}</p>
-        </div>
-
+    <!-- Diet Plan Section -->
+    <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900 dark:to-blue-900 rounded-xl shadow-sm p-8 border border-green-100 dark:border-green-700 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🥗 Personalized Diet Plan</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <h3 class="text-lg font-semibold mb-4">✅ Foods to Include</h3>
-                <div class="space-y-3">
-                    <div class="bg-gray-50 rounded-lg p-3">
-                        <p class="font-medium text-gray-900 mb-2">Vegetables</p>
-                        <ul class="text-sm text-gray-600 space-y-1">
-                            {% for food in diet_plan.diabetic_friendly_foods.vegetables[:3] %}
-                            <li>• {{ food }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="bg-gray-50 rounded-lg p-3">
-                        <p class="font-medium text-gray-900 mb-2">Proteins</p>
-                        <ul class="text-sm text-gray-600 space-y-1">
-                            {% for food in diet_plan.diabetic_friendly_foods.proteins[:3] %}
-                            <li>• {{ food }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <h3 class="text-lg font-semibold mb-4">⚠️ Foods to Avoid</h3>
-                <div class="space-y-3">
-                    <div class="bg-red-50 rounded-lg p-3 border border-red-100">
-                        <p class="font-medium text-gray-900 mb-2">High Sugar</p>
-                        <ul class="text-sm text-gray-600 space-y-1">
-                            {% for food in diet_plan.foods_to_avoid.high_sugar[:3] %}
-                            <li>• {{ food }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="bg-red-50 rounded-lg p-3 border border-red-100">
-                        <p class="font-medium text-gray-900 mb-2">Refined Carbs</p>
-                        <ul class="text-sm text-gray-600 space-y-1">
-                            {% for food in diet_plan.foods_to_avoid.refined_carbs[:3] %}
-                            <li>• {{ food }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if checkup_plan %}
-    <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-            <span class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                🩺
-            </span>
-            Health Checkup Recommendations
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Blood Pressure Status</h3>
-                <p class="text-2xl font-bold text-{% if checkup_plan.blood_pressure_info.status == 'concerning' %}red{% elif checkup_plan.blood_pressure_info.status == 'attention' %}yellow{% else %}green{% endif %}-600">
-                    {{ checkup_plan.blood_pressure_info.reading }}
-                </p>
-                <p class="text-gray-600 mt-1">{{ checkup_plan.blood_pressure_info.category }}</p>
-            </div>
-
-            <div class="bg-green-50 rounded-lg p-6 border border-green-100">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Doctor Visits</h3>
-                <p class="text-2xl font-bold text-green-600">{{ checkup_plan.checkup_frequency.doctor_visits }}</p>
-                <p class="text-sm text-gray-600 mt-1">{{ checkup_plan.checkup_frequency.reason }}</p>
-            </div>
-        </div>
-
-        <div class="space-y-4">
-            <div>
-                <h3 class="text-lg font-semibold mb-3 text-red-600">🔴 Essential Tests</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {% for test in checkup_plan.blood_tests.essential[:4] %}
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                        <p class="font-medium text-gray-900 dark:text-white">{{ test.name }}</p>
-                        <p class="text-sm text-gray-600 mt-1">{{ test.reason }}</p>
-                        <p class="text-xs text-orange-600 mt-2 font-medium">Every {{ test.frequency }}</p>
-                    </div>
+            {% for category, items in diet_plan.items() %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-green-100 dark:border-green-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 capitalize">{{ category }}</h3>
+                <ul class="space-y-2">
+                    {% for item in items %}
+                    <li class="text-gray-700 dark:text-gray-300 flex items-start">
+                        <span class="text-green-500 mr-2">✓</span>
+                        <span>{{ item }}</span>
+                    </li>
                     {% endfor %}
-                </div>
+                </ul>
             </div>
+            {% endfor %}
         </div>
     </div>
-    {% endif %}
+
+    <!-- Health Checkup Recommendations -->
+    <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 rounded-xl shadow-sm p-8 border border-blue-100 dark:border-blue-700 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🏥 Health Checkup Recommendations</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for test, details in checkup_plan.items() %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-blue-100 dark:border-blue-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ test }}</h3>
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ details }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
     <!-- RL Feedback & Learning Section -->
     <div class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900 dark:to-red-900 rounded-xl shadow-sm p-8 border border-orange-100 dark:border-orange-700 mb-8">
@@ -337,6 +219,17 @@
         </a>
     </div>
 </div>
+
+<style>
+#feedbackMessage {
+    animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -359,7 +252,6 @@ async function submitFeedback(recordId, outcome) {
             msgDiv.textContent = '✅ Thank you! Your feedback helps train the AI. Model accuracy: ' + result.rl_stats.accuracy.toFixed(1) + '%';
             msgDiv.classList.remove('hidden');
             
-            // Show confidence adjustment
             setTimeout(() => {
                 alert('🤖 AI Learning Update:\n\n' +
                       'Total Predictions: ' + result.rl_stats.total_predictions + '\n' +
@@ -381,110 +273,111 @@ async function submitFeedback(recordId, outcome) {
     }
 }
 
-<style>
-#feedbackMessage {
-    animation: slideIn 0.3s ease-out;
-}
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-</style>
+// Initialize charts when document loads
+document.addEventListener('DOMContentLoaded', function() {
+    const bmiValue = {{ health_record.bmi }};
+    const glucoseValue = {{ health_record.glucose }};
+    const insulinValue = {{ health_record.insulin }};
+    const riskValue = {{ health_record.prediction_result * 100 }};
 
-const bmiValue = {{ health_record.bmi }};
-const glucoseValue = {{ health_record.glucose }};
-const insulinValue = {{ health_record.insulin }};
-const riskValue = {{ health_record.prediction_result * 100 }};
-
-// BMI Chart
-const bmiCtx = document.getElementById('bmiChart').getContext('2d');
-new Chart(bmiCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Your BMI', 'Healthy Target'],
-        datasets: [{
-            data: [bmiValue, Math.max(25 - bmiValue, 0.1)],
-            backgroundColor: ['#3b82f6', '#e5e7eb'],
-            borderColor: '#fff',
-            borderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
-        }
+    // BMI Chart
+    const bmiCtx = document.getElementById('bmiChart');
+    if (bmiCtx) {
+        new Chart(bmiCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Your BMI', 'Healthy Target'],
+                datasets: [{
+                    data: [bmiValue, Math.max(25 - bmiValue, 0.1)],
+                    backgroundColor: ['#3b82f6', '#e5e7eb'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
     }
-});
 
-// Glucose Chart
-const glucoseCtx = document.getElementById('glucoseChart').getContext('2d');
-new Chart(glucoseCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Your Glucose', 'Normal Range'],
-        datasets: [{
-            data: [glucoseValue, Math.max(100 - glucoseValue, 0.1)],
-            backgroundColor: glucoseValue > 125 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
-            borderColor: '#fff',
-            borderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
-        }
+    // Glucose Chart
+    const glucoseCtx = document.getElementById('glucoseChart');
+    if (glucoseCtx) {
+        new Chart(glucoseCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Your Glucose', 'Normal Range'],
+                datasets: [{
+                    data: [glucoseValue, Math.max(100 - glucoseValue, 0.1)],
+                    backgroundColor: glucoseValue > 125 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
     }
-});
 
-// Insulin Chart
-const insulinCtx = document.getElementById('insulinChart').getContext('2d');
-new Chart(insulinCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Your Insulin', 'Normal Level'],
-        datasets: [{
-            data: [insulinValue, Math.max(12 - insulinValue, 0.1)],
-            backgroundColor: insulinValue > 12 ? ['#a855f7', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
-            borderColor: '#fff',
-            borderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
-        }
+    // Insulin Chart
+    const insulinCtx = document.getElementById('insulinChart');
+    if (insulinCtx) {
+        new Chart(insulinCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Your Insulin', 'Normal Level'],
+                datasets: [{
+                    data: [insulinValue, Math.max(12 - insulinValue, 0.1)],
+                    backgroundColor: insulinValue > 12 ? ['#a855f7', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
     }
-});
 
-// Risk Chart
-const riskCtx = document.getElementById('riskChart').getContext('2d');
-new Chart(riskCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Risk Level', 'Safe Zone'],
-        datasets: [{
-            data: [riskValue, 100 - riskValue],
-            backgroundColor: riskValue > 50 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
-            borderColor: '#fff',
-            borderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
-        }
+    // Risk Chart
+    const riskCtx = document.getElementById('riskChart');
+    if (riskCtx) {
+        new Chart(riskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Risk Level', 'Safe Zone'],
+                datasets: [{
+                    data: [riskValue, 100 - riskValue],
+                    backgroundColor: riskValue > 50 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
     }
 });
 </script>
