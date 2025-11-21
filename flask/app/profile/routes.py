@@ -1,8 +1,10 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, send_file
 from flask_login import login_required, current_user
 from app.profile import profile_bp
-from app.models import db, User
+from app.models import db, User, HealthRecord, Gamification
 from werkzeug.security import check_password_hash
+from app.utils.report_generator import create_health_report_pdf
+from datetime import datetime
 
 @profile_bp.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -42,8 +44,6 @@ def settings():
 @profile_bp.route('/health-stats', methods=['GET'])
 @login_required
 def health_stats():
-    from app.models import HealthRecord, Gamification
-    
     records = HealthRecord.query.filter_by(user_id=current_user.id).order_by(HealthRecord.created_at.desc()).all()
     gamification = Gamification.query.filter_by(user_id=current_user.id).first()
     
@@ -62,3 +62,27 @@ def health_stats():
                          avg_glucose=avg_glucose,
                          avg_bmi=avg_bmi,
                          high_risk_count=high_risk_count)
+
+@profile_bp.route('/download-report', methods=['GET'])
+@login_required
+def download_report():
+    """Generate and download PDF health report"""
+    records = HealthRecord.query.filter_by(user_id=current_user.id).order_by(HealthRecord.created_at.desc()).all()
+    gamification = Gamification.query.filter_by(user_id=current_user.id).first()
+    
+    if not records:
+        flash('No health records to generate report', 'error')
+        return redirect(url_for('profile.health_stats'))
+    
+    # Generate PDF
+    pdf_buffer = create_health_report_pdf(current_user, records, gamification)
+    
+    # Create filename with timestamp
+    filename = f"Health_Report_{current_user.username}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    
+    return send_file(
+        pdf_buffer,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=filename
+    )
