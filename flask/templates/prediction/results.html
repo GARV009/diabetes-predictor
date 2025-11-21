@@ -184,14 +184,94 @@
     <!-- Health Checkup Recommendations -->
     <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 rounded-xl shadow-sm p-8 border border-blue-100 dark:border-blue-700 mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🏥 Health Checkup Recommendations</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {% for test, details in checkup_plan.items() %}
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-blue-100 dark:border-blue-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ test }}</h3>
-                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ details }}</p>
+        
+        {% if checkup_plan %}
+            <!-- Essential Tests -->
+            {% if checkup_plan.essential %}
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-red-600 dark:text-red-400 mb-4">🔴 Essential Tests</h3>
+                <div class="grid grid-cols-1 gap-4">
+                    {% for test in checkup_plan.essential %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border-l-4 border-red-500">
+                        {% if test is mapping %}
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white text-lg">{{ test.name or test }}</h4>
+                                    {% if test.reason %}
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ test.reason }}</p>
+                                    {% endif %}
+                                </div>
+                                {% if test.frequency %}
+                                <span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-3 py-1 rounded-lg text-xs font-medium ml-4 whitespace-nowrap">{{ test.frequency }}</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p class="text-gray-700 dark:text-gray-300">{{ test }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            {% endfor %}
-        </div>
+            {% endif %}
+
+            <!-- Recommended Tests -->
+            {% if checkup_plan.recommended %}
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">🟡 Recommended Tests</h3>
+                <div class="grid grid-cols-1 gap-4">
+                    {% for test in checkup_plan.recommended %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border-l-4 border-yellow-500">
+                        {% if test is mapping %}
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white text-lg">{{ test.name or test }}</h4>
+                                    {% if test.reason %}
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ test.reason }}</p>
+                                    {% endif %}
+                                </div>
+                                {% if test.frequency %}
+                                <span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded-lg text-xs font-medium ml-4 whitespace-nowrap">{{ test.frequency }}</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p class="text-gray-700 dark:text-gray-300">{{ test }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Optional Tests -->
+            {% if checkup_plan.optional %}
+            <div>
+                <h3 class="text-xl font-bold text-green-600 dark:text-green-400 mb-4">🟢 Optional Tests</h3>
+                <div class="grid grid-cols-1 gap-4">
+                    {% for test in checkup_plan.optional %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border-l-4 border-green-500">
+                        {% if test is mapping %}
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white text-lg">{{ test.name or test }}</h4>
+                                    {% if test.reason %}
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ test.reason }}</p>
+                                    {% endif %}
+                                </div>
+                                {% if test.frequency %}
+                                <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-lg text-xs font-medium ml-4 whitespace-nowrap">{{ test.frequency }}</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p class="text-gray-700 dark:text-gray-300">{{ test }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+            <p class="text-gray-600 dark:text-gray-400">No specific recommendations at this time.</p>
+        {% endif %}
     </div>
 
     <!-- RL Feedback & Learning Section -->
@@ -304,16 +384,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const insulinValue = {{ health_record.insulin }};
     const riskValue = {{ health_record.prediction_result * 100 }};
 
-    // BMI Chart
+    // BMI Chart - Show percentage of healthy BMI range (18.5-24.9)
     const bmiCtx = document.getElementById('bmiChart');
     if (bmiCtx) {
+        const healthyBMIMax = 24.9;
+        const bmiPercentage = Math.min((bmiValue / healthyBMIMax) * 100, 100);
         new Chart(bmiCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Your BMI', 'Healthy Target'],
+                labels: [bmiPercentage.toFixed(0) + '% - Your BMI', 'Remaining'],
                 datasets: [{
-                    data: [bmiValue, Math.max(25 - bmiValue, 0.1)],
-                    backgroundColor: ['#3b82f6', '#e5e7eb'],
+                    data: [bmiPercentage, Math.max(100 - bmiPercentage, 0.1)],
+                    backgroundColor: bmiValue < 25 ? ['#10b981', '#e5e7eb'] : bmiValue < 30 ? ['#f59e0b', '#e5e7eb'] : ['#ef4444', '#e5e7eb'],
                     borderColor: '#fff',
                     borderWidth: 2
                 }]
@@ -322,23 +404,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
+                    legend: { display: true, position: 'bottom' },
+                    tooltip: { 
+                        enabled: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                            }
+                        }
+                    }
                 }
             }
         });
     }
 
-    // Glucose Chart
+    // Glucose Chart - Show percentage toward high risk (100 = healthy, 126+ = diabetic)
     const glucoseCtx = document.getElementById('glucoseChart');
     if (glucoseCtx) {
+        const glucosePercentage = Math.min((glucoseValue / 126) * 100, 100);
         new Chart(glucoseCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Your Glucose', 'Normal Range'],
+                labels: [glucosePercentage.toFixed(0) + '% - Your Glucose', 'Remaining'],
                 datasets: [{
-                    data: [glucoseValue, Math.max(100 - glucoseValue, 0.1)],
-                    backgroundColor: glucoseValue > 125 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+                    data: [glucosePercentage, Math.max(100 - glucosePercentage, 0.1)],
+                    backgroundColor: glucoseValue < 100 ? ['#10b981', '#e5e7eb'] : glucoseValue < 126 ? ['#f59e0b', '#e5e7eb'] : ['#ef4444', '#e5e7eb'],
                     borderColor: '#fff',
                     borderWidth: 2
                 }]
@@ -347,23 +437,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
+                    legend: { display: true, position: 'bottom' },
+                    tooltip: { 
+                        enabled: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                            }
+                        }
+                    }
                 }
             }
         });
     }
 
-    // Insulin Chart
+    // Insulin Chart - Show percentage toward high level (12 = normal threshold)
     const insulinCtx = document.getElementById('insulinChart');
     if (insulinCtx) {
+        const insulinPercentage = Math.min((insulinValue / 20) * 100, 100);
         new Chart(insulinCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Your Insulin', 'Normal Level'],
+                labels: [insulinPercentage.toFixed(0) + '% - Your Insulin', 'Remaining'],
                 datasets: [{
-                    data: [insulinValue, Math.max(12 - insulinValue, 0.1)],
-                    backgroundColor: insulinValue > 12 ? ['#a855f7', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+                    data: [insulinPercentage, Math.max(100 - insulinPercentage, 0.1)],
+                    backgroundColor: insulinValue < 12 ? ['#10b981', '#e5e7eb'] : insulinValue < 20 ? ['#f59e0b', '#e5e7eb'] : ['#a855f7', '#e5e7eb'],
                     borderColor: '#fff',
                     borderWidth: 2
                 }]
@@ -372,23 +470,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
+                    legend: { display: true, position: 'bottom' },
+                    tooltip: { 
+                        enabled: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                            }
+                        }
+                    }
                 }
             }
         });
     }
 
-    // Risk Chart
+    // Risk Chart - Show diabetes risk vs safe zone
     const riskCtx = document.getElementById('riskChart');
     if (riskCtx) {
         new Chart(riskCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Risk Level', 'Safe Zone'],
+                labels: [riskValue.toFixed(1) + '% - Risk', (100 - riskValue).toFixed(1) + '% - Safe'],
                 datasets: [{
                     data: [riskValue, 100 - riskValue],
-                    backgroundColor: riskValue > 50 ? ['#ef4444', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
+                    backgroundColor: riskValue > 50 ? ['#ef4444', '#e5e7eb'] : riskValue > 25 ? ['#f59e0b', '#e5e7eb'] : ['#10b981', '#e5e7eb'],
                     borderColor: '#fff',
                     borderWidth: 2
                 }]
@@ -397,8 +502,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
+                    legend: { display: true, position: 'bottom' },
+                    tooltip: { 
+                        enabled: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                            }
+                        }
+                    }
                 }
             }
         });
