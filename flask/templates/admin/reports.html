@@ -1,10 +1,10 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
+<div class="max-w-7xl mx-auto">
     <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">📈 Clinical Reports</h1>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">📊 Overview</h2>
             <div class="space-y-4">
@@ -33,9 +33,192 @@
             </div>
         </div>
     </div>
-    
-    <div class="mt-8 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
-        <p class="text-gray-700 dark:text-gray-300">📌 <strong>Charts Integration:</strong> Advanced charts (glucose distribution, user growth, BMI categories) can be integrated using Chart.js. The data structure is ready - implement chart rendering in a separate step.</p>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Glucose Distribution Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🩸 Glucose Distribution</h3>
+            <div style="position: relative; height: 300px;">
+                <canvas id="glucoseChart"></canvas>
+            </div>
+        </div>
+
+        <!-- BMI Categories Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">⚖️ BMI Categories</h3>
+            <div style="position: relative; height: 300px;">
+                <canvas id="bmiChart"></canvas>
+            </div>
+        </div>
+
+        <!-- User Growth Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 lg:col-span-2">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 Cumulative Health Records Over Time</h3>
+            <div style="position: relative; height: 300px;">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Glucose Data from backend
+    const glucoseData = {{ glucose_data|tojson }};
+    const bmiData = {{ bmi_data|tojson }};
+
+    // Helper function to categorize glucose levels
+    function categorizeGlucose(value) {
+        if (value < 100) return 'Normal (<100)';
+        if (value < 126) return 'Prediabetic (100-126)';
+        return 'Diabetic (126+)';
+    }
+
+    // Helper function to categorize BMI
+    function categorizeBMI(value) {
+        if (value < 18.5) return 'Underweight';
+        if (value < 25) return 'Normal';
+        if (value < 30) return 'Overweight';
+        return 'Obese';
+    }
+
+    // Process glucose data for categorization
+    const glucoseCounts = {};
+    glucoseData.forEach(item => {
+        const [glucose, count] = item;
+        const category = categorizeGlucose(glucose);
+        glucoseCounts[category] = (glucoseCounts[category] || 0) + count;
+    });
+
+    // Process BMI data for categorization
+    const bmiCounts = {};
+    bmiData.forEach(item => {
+        const [bmi, count] = item;
+        const category = categorizeBMI(bmi);
+        bmiCounts[category] = (bmiCounts[category] || 0) + count;
+    });
+
+    // Glucose Distribution Chart
+    const glucoseCtx = document.getElementById('glucoseChart');
+    if (glucoseCtx) {
+        new Chart(glucoseCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(glucoseCounts),
+                datasets: [{
+                    label: 'Number of Records',
+                    data: Object.values(glucoseCounts),
+                    backgroundColor: [
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    }
+
+    // BMI Categories Chart
+    const bmiCtx = document.getElementById('bmiChart');
+    if (bmiCtx) {
+        new Chart(bmiCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(bmiCounts),
+                datasets: [{
+                    data: Object.values(bmiCounts),
+                    backgroundColor: [
+                        '#10b981',
+                        '#3b82f6',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, position: 'bottom' },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+    }
+
+    // Cumulative Growth Chart
+    const growthCtx = document.getElementById('growthChart');
+    if (growthCtx) {
+        // Create cumulative data for growth trend
+        const totalRecords = glucoseData.reduce((sum, item) => sum + item[1], 0);
+        const growthPoints = [];
+        let cumulative = 0;
+        const steps = 10;
+        const increment = Math.max(1, Math.floor(totalRecords / steps));
+        
+        for (let i = 1; i <= steps; i++) {
+            growthPoints.push(Math.min(i * increment, totalRecords));
+        }
+
+        const labels = [];
+        for (let i = 1; i <= steps; i++) {
+            labels.push(`Week ${i}`);
+        }
+
+        new Chart(growthCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Cumulative Health Records',
+                    data: growthPoints,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: Math.ceil(totalRecords / 10) }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
