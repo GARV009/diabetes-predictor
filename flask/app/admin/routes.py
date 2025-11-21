@@ -61,15 +61,19 @@ def reports():
     health_records = HealthRecord.query.all()
     users = User.query.filter_by(role='user').all()
     
-    glucose_data = db.session.query(
+    glucose_rows = db.session.query(
         HealthRecord.glucose,
         func.count(HealthRecord.id)
     ).group_by(HealthRecord.glucose).all()
     
-    bmi_data = db.session.query(
+    bmi_rows = db.session.query(
         HealthRecord.bmi,
         func.count(HealthRecord.id)
     ).group_by(HealthRecord.bmi).all()
+    
+    # Convert SQLAlchemy Row objects to JSON-serializable lists
+    glucose_data = [[float(row[0]), int(row[1])] for row in glucose_rows]
+    bmi_data = [[float(row[0]), int(row[1])] for row in bmi_rows]
     
     return render_template('admin/reports.html',
                          total_records=len(health_records),
