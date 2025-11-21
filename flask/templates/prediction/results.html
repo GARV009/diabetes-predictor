@@ -142,17 +142,41 @@
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🥗 Personalized Diet Plan</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {% for category, items in diet_plan.items() %}
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-green-100 dark:border-green-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 capitalize">{{ category }}</h3>
-                <ul class="space-y-2">
-                    {% for item in items %}
-                    <li class="text-gray-700 dark:text-gray-300 flex items-start">
-                        <span class="text-green-500 mr-2">✓</span>
-                        <span>{{ item }}</span>
-                    </li>
+                {% if items is mapping %}
+                    <!-- Handle dictionary items (like friendly_foods, foods_to_avoid, etc.) -->
+                    {% for subcategory, food_list in items.items() %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-green-100 dark:border-green-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 capitalize">{{ subcategory }}</h3>
+                        <ul class="space-y-2">
+                            {% if food_list is iterable and food_list is not string %}
+                                {% for item in food_list %}
+                                <li class="text-gray-700 dark:text-gray-300 flex items-start">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>{{ item }}</span>
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="text-gray-700 dark:text-gray-300">{{ food_list }}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
                     {% endfor %}
-                </ul>
-            </div>
+                {% elif items is iterable and items is not string %}
+                    <!-- Handle list items (like tips) -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-green-100 dark:border-green-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 capitalize">{{ category }}</h3>
+                        <ul class="space-y-2">
+                            {% for item in items %}
+                            <li class="text-gray-700 dark:text-gray-300 flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>{{ item }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <!-- Skip non-iterable items like integers -->
+                {% endif %}
             {% endfor %}
         </div>
     </div>
