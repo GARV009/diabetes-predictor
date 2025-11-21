@@ -1,0 +1,62 @@
+{% extends "doctor/base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">👨‍⚕️ Doctor Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Total Patients</p>
+            <p class="text-4xl font-bold text-medical-blue-600 mt-2">{{ patients|length }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Appointments</p>
+            <p class="text-4xl font-bold text-green-600 mt-2">{{ total_appointments }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Upcoming Today</p>
+            <p class="text-4xl font-bold text-orange-600 mt-2">{{ upcoming_appointments|length }}</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">📅 Upcoming Appointments</h2>
+            {% if upcoming_appointments %}
+            <div class="space-y-3">
+                {% for appt in upcoming_appointments %}
+                <div class="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ appt.patient.username }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ appt.appointment_date.strftime('%b %d, %Y %I:%M %p') }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ appt.reason or 'General Consultation' }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400">No appointments scheduled</p>
+            {% endif %}
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">👥 Recent Patients</h2>
+            {% if patients %}
+            <div class="space-y-2">
+                {% for patient in patients[:5] %}
+                <a href="{{ url_for('doctor.patient_details', patient_id=patient.id) }}" class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition">
+                    <span class="font-medium text-gray-900 dark:text-white">{{ patient.username }}</span>
+                    <span class="text-xs text-medical-blue-600">View →</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400">No patients yet</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-8">
+        <a href="{{ url_for('doctor.patients') }}" class="bg-medical-blue-600 hover:bg-medical-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition">View All Patients</a>
+        <a href="{{ url_for('doctor.appointments') }}" class="ml-3 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition">Manage Appointments</a>
+    </div>
+</div>
+{% endblock %}

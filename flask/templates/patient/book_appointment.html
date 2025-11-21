@@ -1,0 +1,44 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Book Appointment - Health Manager{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">📅 Book Appointment</h1>
+    <p class="text-gray-600 dark:text-gray-400 mb-8">Schedule a consultation with a doctor</p>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
+        <form method="POST" action="{{ url_for('patient.book_appointment_submit') }}" class="space-y-6">
+            <div>
+                <label for="doctor_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Doctor</label>
+                <select id="doctor_id" name="doctor_id" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-medical-blue-500 focus:border-medical-blue-500">
+                    <option value="">-- Choose a doctor --</option>
+                    {% for doctor in doctors %}
+                    <option value="{{ doctor.id }}">{{ doctor.username }} ({{ doctor.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="appointment_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Appointment Date & Time</label>
+                <input type="datetime-local" id="appointment_date" name="appointment_date" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-medical-blue-500 focus:border-medical-blue-500">
+            </div>
+            
+            <div>
+                <label for="appointment_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Appointment Type</label>
+                <select id="appointment_type" name="appointment_type" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-medical-blue-500 focus:border-medical-blue-500">
+                    <option value="telemedicine">Telemedicine</option>
+                    <option value="in-person">In-Person</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reason for Consultation</label>
+                <textarea id="reason" name="reason" rows="4" placeholder="Describe your health concerns..." class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-medical-blue-500 focus:border-medical-blue-500"></textarea>
+            </div>
+            
+            <button type="submit" class="w-full bg-medical-blue-600 hover:bg-medical-blue-700 text-white font-bold py-3 rounded-lg transition">Book Appointment</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

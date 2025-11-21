@@ -1,0 +1,41 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">📈 Clinical Reports</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">📊 Overview</h2>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Health Records</p>
+                    <p class="text-3xl font-bold text-medical-blue-600">{{ total_records }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Active Users</p>
+                    <p class="text-3xl font-bold text-green-600">{{ total_users }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">💊 Health Metrics</h2>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Glucose Samples</span>
+                    <span class="font-bold text-gray-900 dark:text-white">{{ glucose_data|length }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">BMI Readings</span>
+                    <span class="font-bold text-gray-900 dark:text-white">{{ bmi_data|length }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-8 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+        <p class="text-gray-700 dark:text-gray-300">📌 <strong>Charts Integration:</strong> Advanced charts (glucose distribution, user growth, BMI categories) can be integrated using Chart.js. The data structure is ready - implement chart rendering in a separate step.</p>
+    </div>
+</div>
+{% endblock %}

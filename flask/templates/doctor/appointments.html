@@ -1,0 +1,49 @@
+{% extends "doctor/base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">📅 Appointments</h1>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Patient</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Date & Time</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Type</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for appt in appointments %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ appt.patient.username }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ appt.appointment_date.strftime('%b %d, %Y %I:%M %p') }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 capitalize">{{ appt.appointment_type }}</td>
+                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-semibold {% if appt.status == 'confirmed' %}bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200{% elif appt.status == 'cancelled' %}bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200{% else %}bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200{% endif %} capitalize">{{ appt.status }}</span></td>
+                        <td class="px-6 py-4 text-sm space-x-2">
+                            {% if appt.status == 'scheduled' %}
+                            <form method="POST" action="{{ url_for('doctor.confirm_appointment', appointment_id=appt.id) }}" style="display:inline;">
+                                <button type="submit" class="text-green-600 hover:text-green-700 font-semibold">Confirm</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('doctor.cancel_appointment', appointment_id=appt.id) }}" style="display:inline;">
+                                <button type="submit" class="text-red-600 hover:text-red-700 font-semibold">Cancel</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    {% if not appointments %}
+    <div class="text-center py-12">
+        <p class="text-gray-600 dark:text-gray-400 text-lg">No appointments scheduled</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

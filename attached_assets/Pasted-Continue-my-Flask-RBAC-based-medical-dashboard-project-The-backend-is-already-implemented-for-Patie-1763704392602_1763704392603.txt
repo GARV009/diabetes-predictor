@@ -1,0 +1,141 @@
+Continue my Flask RBAC-based medical dashboard project.
+The backend is already implemented for Patients, Doctors, and Admins.
+Now generate all the missing frontend templates and UI logic listed below.
+Use Bootstrap 5 + simple medical theme styling.
+Follow the exact requirements:
+
+📌 1. Doctor Panel Templates to Generate
+
+Create the following HTML templates inside templates/doctor/:
+
+1. doctor_dashboard.html
+
+Show upcoming appointments
+
+Quick stats: total patients, today’s appointments, pending notes
+
+2. patient_list.html
+
+Table of all patients
+
+Columns: name, email, last visit, “View Profile” button
+
+3. patient_details.html
+
+Show full patient info
+
+Display health history (glucose/BMI list)
+
+Form to add doctor notes
+
+List of existing notes
+
+4. appointments.html
+
+Table of doctor’s appointments
+
+Buttons: confirm, cancel
+
+Status badges (Pending/Confirmed/Cancelled)
+
+All templates must extend a common doctor_base.html.
+
+📌 2. Admin Panel Templates
+
+Create templates in templates/admin/:
+
+1. admin_dashboard.html
+
+Show system statistics:
+
+Total users, total doctors, total patients
+
+Avg glucose, avg BMI
+
+Risk breakdown pie chart (use Chart.js)
+
+Leaderboard preview
+
+2. admin_users.html
+
+List of all users
+
+Role badges
+
+Optionally add disable/delete buttons
+
+3. clinical_reports.html
+
+Charts:
+
+User growth over time (line chart)
+
+Glucose distribution (histogram)
+
+BMI category chart (bar chart)
+
+All templates must extend admin_base.html.
+
+📌 3. Sidebar Role-Based Navigation
+
+Update the global sidebar template to:
+
+If Patient
+
+Dashboard
+
+Health history
+
+Diet plan
+
+Appointments (book appointment)
+
+Gamification
+
+Leaderboard
+
+If Doctor
+
+Doctor Dashboard
+
+Patient List
+
+Appointments
+
+Medical Notes
+
+If Admin
+
+Admin Dashboard
+
+User Management
+
+Analytics / Reports
+
+System Settings (placeholder)
+
+Hide all irrelevant pages depending on role.
+
+📌 4. Appointment Booking UI (Patient Side)
+
+Create:
+
+templates/patient/book_appointment.html
+
+Dropdown: choose doctor
+
+Select date & time
+
+Textarea: reason for consultation
+
+Submit button
+
+After submit → redirect to patient appointments page
+
+Also generate the patient appointments list page:
+
+Status
+
+Doctor name
+
+Date/time

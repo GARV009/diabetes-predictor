@@ -1,0 +1,63 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">⚙️ Admin Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Total Users</p>
+            <p class="text-4xl font-bold text-medical-blue-600 mt-2">{{ total_users }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Total Doctors</p>
+            <p class="text-4xl font-bold text-green-600 mt-2">{{ total_doctors }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Avg Glucose</p>
+            <p class="text-4xl font-bold text-orange-600 mt-2">{{ avg_glucose }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Avg BMI</p>
+            <p class="text-4xl font-bold text-purple-600 mt-2">{{ avg_bmi }}</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">📊 Health Records</h2>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Total Records</span>
+                    <span class="font-bold text-gray-900 dark:text-white">{{ total_records }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Low Risk</span>
+                    <span class="font-bold text-green-600">{{ low_risk }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">High Risk</span>
+                    <span class="font-bold text-red-600">{{ high_risk }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">🏆 Top Performers</h2>
+            <div class="space-y-2">
+                {% for user, gamification in top_performers[:5] %}
+                <div class="flex justify-between items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                    <span class="text-gray-900 dark:text-white">{{ user.username }}</span>
+                    <span class="font-bold text-purple-600">{{ gamification.total_points }} pts</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex gap-4">
+        <a href="{{ url_for('admin.users') }}" class="bg-medical-blue-600 hover:bg-medical-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition">👥 Manage Users</a>
+        <a href="{{ url_for('admin.reports') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition">📈 View Reports</a>
+    </div>
+</div>
+{% endblock %}
