@@ -76,3 +76,10 @@ def reports():
                          total_users=len(users),
                          glucose_data=glucose_data,
                          bmi_data=bmi_data)
+
+@admin_bp.route('/rl-model-dashboard')
+@login_required
+@admin_required
+def rl_model_dashboard():
+    """Display RL model performance dashboard for admins"""
+    return render_template('rl_dashboard.html')
