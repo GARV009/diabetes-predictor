@@ -55,10 +55,10 @@ def predict():
     # Get probability-based prediction (0-100%)
     try:
         prediction_proba = model.predict_proba(scaled_features)[0]
-        diabetes_probability = prediction_proba[1] * 100  # Probability of diabetes class
+        diabetes_probability = float(prediction_proba[1]) * 100  # Convert to Python float, probability of diabetes class
         
         # Apply RL-based adjustment to risk score
-        risk_score = rl_system.adjust_risk_score(diabetes_probability)
+        risk_score = float(rl_system.adjust_risk_score(diabetes_probability))
         
         # Convert probability to binary prediction for classification
         pred_value = 1 if risk_score >= 50 else 0
@@ -67,7 +67,7 @@ def predict():
         # Fallback to binary prediction
         prediction = model.predict(scaled_features)
         pred_value = int(prediction[0])
-        risk_score = 100 if pred_value == 1 else 0
+        risk_score = 100.0 if pred_value == 1 else 0.0
     
     # Determine prediction text and risk level
     if pred_value == 1:
@@ -78,32 +78,34 @@ def predict():
         risk_level = "Low"
     
     # Create health record with probability-based risk score
+    # Convert all values to Python native types (not numpy types)
     health_record = HealthRecord(
-        user_id=current_user.id,
-        glucose=glucose,
-        insulin=insulin,
-        bmi=bmi,
-        age=age,
-        bp_systolic=bp_systolic,
-        bp_diastolic=bp_diastolic,
-        family_history=family_history,
-        prediction_result=risk_score / 100,  # Store as decimal (0-1)
-        risk_level=risk_level
+        user_id=int(current_user.id),
+        glucose=float(glucose),
+        insulin=float(insulin),
+        bmi=float(bmi),
+        age=int(age),
+        bp_systolic=float(bp_systolic),
+        bp_diastolic=float(bp_diastolic),
+        family_history=bool(family_history),
+        prediction_result=float(risk_score / 100),  # Store as decimal (0-1)
+        risk_level=str(risk_level)
     )
     db.session.add(health_record)
     
     # Record prediction for RL feedback system
+    # Convert all values to Python native types for RL system
     prediction_data = rl_system.record_prediction(
-        user_id=current_user.id,
-        prediction_prob=risk_score / 100,
-        predicted_label=pred_value,
+        user_id=int(current_user.id),
+        prediction_prob=float(risk_score / 100),
+        predicted_label=int(pred_value),
         actual_features={
-            'glucose': glucose,
-            'insulin': insulin,
-            'bmi': bmi,
-            'age': age,
-            'bp_systolic': bp_systolic,
-            'bp_diastolic': bp_diastolic
+            'glucose': float(glucose),
+            'insulin': float(insulin),
+            'bmi': float(bmi),
+            'age': float(age),
+            'bp_systolic': float(bp_systolic),
+            'bp_diastolic': float(bp_diastolic)
         }
     )
     
@@ -138,6 +140,10 @@ def predict():
     
     # Calculate health score (0-100)
     health_score = 0
+    glucose = float(glucose)
+    bmi = float(bmi)
+    insulin = float(insulin)
+    bp_systolic = float(bp_systolic)
     if bmi < 25:
         health_score += 25
     elif bmi < 30:
