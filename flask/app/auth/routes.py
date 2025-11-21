@@ -61,13 +61,16 @@ def register():
             flash('Password must be at least 6 characters long.', 'error')
             return redirect(url_for('auth.register'))
         
-        user = User(username=username, email=email)
+        role = request.form.get('role', 'user')
+        user = User(username=username, email=email, role=role)
         user.set_password(password)
         db.session.add(user)
         db.session.flush()
         
-        gamification = Gamification(user_id=user.id)
-        db.session.add(gamification)
+        if role == 'user':
+            gamification = Gamification(user_id=user.id)
+            db.session.add(gamification)
+        
         db.session.commit()
         
         flash('Registration successful! Please log in.', 'success')

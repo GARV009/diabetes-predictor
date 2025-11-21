@@ -12,10 +12,14 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), default='user')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     health_records = db.relationship('HealthRecord', backref='user', lazy=True, cascade='all, delete-orphan')
     gamification = db.relationship('Gamification', backref='user', uselist=False, cascade='all, delete-orphan')
+    doctor_notes_written = db.relationship('DoctorNote', backref='doctor', lazy=True, foreign_keys='DoctorNote.doctor_id')
+    appointments_as_doctor = db.relationship('Appointment', backref='doctor', lazy=True, foreign_keys='Appointment.doctor_id')
+    appointments_as_patient = db.relationship('Appointment', backref='patient', lazy=True, foreign_keys='Appointment.patient_id')
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -117,3 +121,42 @@ class Gamification(db.Model):
     
     def __repr__(self):
         return f'<Gamification User {self.user_id} - {self.total_points} points>'
+
+
+class DoctorNote(db.Model):
+    __tablename__ = 'doctor_notes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    recommendations = db.Column(db.Text, nullable=True)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<DoctorNote {self.id} - Patient {self.patient_id}>'
+
+
+class Appointment(db.Model):
+    __tablename__ = 'appointments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    appointment_date = db.Column(db.DateTime, nullable=False)
+    duration_minutes = db.Column(db.Integer, default=30)
+    appointment_type = db.Column(db.String(50), default='telemedicine')
+    status = db.Column(db.String(20), default='scheduled')
+    
+    reason = db.Column(db.Text, nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<Appointment {self.id} - Patient {self.patient_id}>'
