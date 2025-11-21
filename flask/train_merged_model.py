@@ -27,15 +27,15 @@ print("=" * 80)
 # Step 1: Load both datasets
 print("\n📂 Loading datasets...")
 try:
-    df1 = pd.read_csv('flask/diabetes_original.csv')
+    df1 = pd.read_csv('diabetes.csv')
     print(f"✓ Dataset 1 (Diabetes): {df1.shape}")
     print(f"  Columns: {list(df1.columns)}")
 except Exception as e:
-    print(f"✗ Error loading diabetes_original.csv: {e}")
+    print(f"✗ Error loading diabetes.csv: {e}")
     df1 = pd.DataFrame()
 
 try:
-    df2 = pd.read_csv('flask/healthcare_diabetes.csv')
+    df2 = pd.read_csv('healthcare_diabetes.csv')
     print(f"✓ Dataset 2 (Healthcare-Diabetes): {df2.shape}")
     print(f"  Columns: {list(df2.columns)}")
     
@@ -96,7 +96,7 @@ print(f"✓ Features scaled using StandardScaler")
 # Step 6: Train multiple models
 print("\n🤖 Training multiple models...")
 models = {
-    'Logistic Regression': LogisticRegression(max_iter=1000, random_state=42, probability=True),
+    'Logistic Regression': LogisticRegression(max_iter=1000, random_state=42),
     'Random Forest': RandomForestClassifier(n_estimators=200, random_state=42, max_depth=15),
     'Gradient Boosting': GradientBoostingClassifier(n_estimators=150, random_state=42, learning_rate=0.1),
     'SVM': SVC(kernel='rbf', probability=True, random_state=42, C=1.0),
