@@ -6,3 +6,4 @@ Flask-SQLAlchemy
 Flask-Login
 Flask-Bcrypt
 reportlab
+reportlab
