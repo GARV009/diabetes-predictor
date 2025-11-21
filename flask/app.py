@@ -2,8 +2,14 @@ import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
 import pickle
-from diet_planner import generate_diet_plan
-from health_checkup import generate_health_checkup_plan
+import sys
+import os
+
+# Add the current directory to Python path for local development
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from app.utils.diet_planner import generate_diet_plan
+from app.utils.health_checkup import generate_health_checkup_plan
 
 app = Flask(__name__)
 model = pickle.load(open('model.pkl', 'rb'))
