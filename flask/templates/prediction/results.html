@@ -139,8 +139,14 @@
 
     <!-- Diet Plan Section -->
     <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900 dark:to-blue-900 rounded-xl shadow-sm p-8 border border-green-100 dark:border-green-700 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🥗 Personalized Diet Plan</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">🥗 Personalized Diet Plan</h2>
+            <button onclick="toggleDietPlan()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2">
+                <span id="dietPlanToggleIcon">−</span>
+                <span id="dietPlanToggleText">Collapse</span>
+            </button>
+        </div>
+        <div id="dietPlanContent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {% for category, items in diet_plan.items() %}
                 {% if items is mapping %}
                     <!-- Handle dictionary items (like friendly_foods, foods_to_avoid, etc.) -->
@@ -183,7 +189,14 @@
 
     <!-- Health Checkup Recommendations -->
     <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 rounded-xl shadow-sm p-8 border border-blue-100 dark:border-blue-700 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🏥 Health Checkup Recommendations</h2>
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">🏥 Health Checkup Recommendations</h2>
+            <button onclick="toggleCheckupPlan()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2">
+                <span id="checkupPlanToggleIcon">−</span>
+                <span id="checkupPlanToggleText">Collapse</span>
+            </button>
+        </div>
+        <div id="checkupPlanContent">
         
         <!-- Blood Pressure Info -->
         {% if checkup_plan.blood_pressure_info %}
@@ -338,12 +351,97 @@
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Collapse/Expand Animations */
+.collapse-content {
+    max-height: 9999px;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+    opacity: 1;
+}
+
+.collapse-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.4s ease-in, opacity 0.4s ease-in;
+}
+
+.toggle-button {
+    transition: transform 0.3s ease;
+}
+
+.toggle-button.rotated {
+    transform: rotate(180deg);
+}
 </style>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
+// Toggle Diet Plan
+function toggleDietPlan() {
+    const content = document.getElementById('dietPlanContent');
+    const icon = document.getElementById('dietPlanToggleIcon');
+    const text = document.getElementById('dietPlanToggleText');
+    
+    if (content.classList.contains('collapsed')) {
+        content.classList.remove('collapsed');
+        icon.textContent = '−';
+        text.textContent = 'Collapse';
+        localStorage.setItem('dietPlanCollapsed', 'false');
+    } else {
+        content.classList.add('collapsed');
+        icon.textContent = '+';
+        text.textContent = 'Expand';
+        localStorage.setItem('dietPlanCollapsed', 'true');
+    }
+}
+
+// Toggle Checkup Plan
+function toggleCheckupPlan() {
+    const content = document.getElementById('checkupPlanContent');
+    const icon = document.getElementById('checkupPlanToggleIcon');
+    const text = document.getElementById('checkupPlanToggleText');
+    
+    if (content.classList.contains('collapsed')) {
+        content.classList.remove('collapsed');
+        icon.textContent = '−';
+        text.textContent = 'Collapse';
+        localStorage.setItem('checkupPlanCollapsed', 'false');
+    } else {
+        content.classList.add('collapsed');
+        icon.textContent = '+';
+        text.textContent = 'Expand';
+        localStorage.setItem('checkupPlanCollapsed', 'true');
+    }
+}
+
+// Initialize collapse state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const dietPlanCollapsed = localStorage.getItem('dietPlanCollapsed') === 'true';
+    const checkupPlanCollapsed = localStorage.getItem('checkupPlanCollapsed') === 'true';
+    
+    const dietContent = document.getElementById('dietPlanContent');
+    const checkupContent = document.getElementById('checkupPlanContent');
+    
+    // Apply collapse class
+    dietContent.classList.add('collapse-content');
+    checkupContent.classList.add('collapse-content');
+    
+    if (dietPlanCollapsed) {
+        dietContent.classList.add('collapsed');
+        document.getElementById('dietPlanToggleIcon').textContent = '+';
+        document.getElementById('dietPlanToggleText').textContent = 'Expand';
+    }
+    
+    if (checkupPlanCollapsed) {
+        checkupContent.classList.add('collapsed');
+        document.getElementById('checkupPlanToggleIcon').textContent = '+';
+        document.getElementById('checkupPlanToggleText').textContent = 'Expand';
+    }
+});
+
 async function submitFeedback(recordId, outcome) {
     try {
         const response = await fetch(`/prediction/feedback/${recordId}`, {
