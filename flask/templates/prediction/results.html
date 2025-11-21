@@ -31,7 +31,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <h3 class="text-lg font-semibold mb-4 flex items-center">
                 <span class="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                     <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,30 +42,30 @@
             </h3>
             <div class="space-y-3">
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Glucose</span>
+                    <span class="text-gray-600 dark:text-gray-400">Glucose</span>
                     <span class="font-semibold">{{ health_record.glucose }} mg/dL</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Insulin</span>
+                    <span class="text-gray-600 dark:text-gray-400">Insulin</span>
                     <span class="font-semibold">{{ health_record.insulin }} μU/mL</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">BMI</span>
+                    <span class="text-gray-600 dark:text-gray-400">BMI</span>
                     <span class="font-semibold">{{ health_record.bmi }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Age</span>
+                    <span class="text-gray-600 dark:text-gray-400">Age</span>
                     <span class="font-semibold">{{ health_record.age }} years</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Blood Pressure</span>
+                    <span class="text-gray-600 dark:text-gray-400">Blood Pressure</span>
                     <span class="font-semibold">{{ health_record.bp_systolic }}/{{ health_record.bp_diastolic }}</span>
                 </div>
             </div>
         </div>
 
         <div class="lg:col-span-2">
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
                 <h3 class="text-lg font-semibold mb-4">Health Metrics Visualization</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -105,15 +105,15 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Macronutrient Breakdown</h3>
                 <div class="space-y-2">
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Carbohydrates</span>
+                        <span class="text-gray-600 dark:text-gray-400">Carbohydrates</span>
                         <span class="font-semibold">{{ diet_plan.macronutrients.carbohydrates }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Protein</span>
+                        <span class="text-gray-600 dark:text-gray-400">Protein</span>
                         <span class="font-semibold">{{ diet_plan.macronutrients.protein }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Healthy Fats</span>
+                        <span class="text-gray-600 dark:text-gray-400">Healthy Fats</span>
                         <span class="font-semibold">{{ diet_plan.macronutrients.healthy_fats }}</span>
                     </div>
                 </div>
@@ -173,7 +173,7 @@
     {% endif %}
 
     {% if checkup_plan %}
-    <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+    <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100 dark:border-gray-700">
         <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
             <span class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                 🩺
@@ -202,8 +202,8 @@
                 <h3 class="text-lg font-semibold mb-3 text-red-600">🔴 Essential Tests</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {% for test in checkup_plan.blood_tests.essential[:4] %}
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <p class="font-medium text-gray-900">{{ test.name }}</p>
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                        <p class="font-medium text-gray-900 dark:text-white">{{ test.name }}</p>
                         <p class="text-sm text-gray-600 mt-1">{{ test.reason }}</p>
                         <p class="text-xs text-orange-600 mt-2 font-medium">Every {{ test.frequency }}</p>
                     </div>

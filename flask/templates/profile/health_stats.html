@@ -27,10 +27,10 @@
 
     {% if records %}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">Total Checkups</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Total Checkups</p>
                     <p class="text-3xl font-bold text-medical-blue-600 mt-1">{{ records|length }}</p>
                 </div>
                 <div class="h-12 w-12 bg-medical-blue-100 rounded-lg flex items-center justify-center">
@@ -41,10 +41,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">Average Glucose</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Average Glucose</p>
                     <p class="text-3xl font-bold text-orange-600 mt-1">{{ "%.0f"|format(avg_glucose) }}</p>
                     <p class="text-xs text-gray-500 mt-1">mg/dL</p>
                 </div>
@@ -56,10 +56,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">Average BMI</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Average BMI</p>
                     <p class="text-3xl font-bold text-green-600 mt-1">{{ "%.1f"|format(avg_bmi) }}</p>
                     <p class="text-xs text-gray-500 mt-1">
                         {% if avg_bmi < 18.5 %}Underweight{% elif avg_bmi < 25 %}Healthy{% elif avg_bmi < 30 %}Overweight{% else %}Obese{% endif %}
@@ -73,10 +73,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">High Risk Cases</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">High Risk Cases</p>
                     <p class="text-3xl font-bold text-red-600 mt-1">{{ high_risk_count }}</p>
                     <p class="text-xs text-gray-500 mt-1">
                         {% if high_risk_count == 0 %}All Clear! 🎉{% else %}{{ (high_risk_count / records|length * 100)|int }}% of checks{% endif %}
@@ -126,7 +126,7 @@
             {% for badge in badges %}
             <div class="{% if badge.earned %}bg-yellow-50 border-2 border-yellow-300{% else %}bg-gray-50 border-2 border-gray-200{% endif %} rounded-lg p-4 text-center">
                 <p class="text-3xl mb-2">{{ badge.icon }}</p>
-                <p class="text-sm font-medium text-gray-900">{{ badge.name }}</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ badge.name }}</p>
                 <p class="text-xs text-gray-600 mt-1">{% if badge.earned %}Unlocked ✓{% else %}Locked{% endif %}</p>
             </div>
             {% endfor %}
@@ -134,11 +134,11 @@
     </div>
     {% endif %}
 
-    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <h2 class="text-xl font-semibold mb-4">📊 Recent Checkups</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 dark:bg-gray-900">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Glucose</th>
@@ -149,17 +149,17 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     {% for record in records[:10] %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <tr class="hover:bg-gray-50 dark:bg-gray-900">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                             {{ record.created_at.strftime('%b %d, %Y') }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                             {{ record.glucose }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                             {{ record.bmi }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                             {{ record.age }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -174,7 +174,7 @@
         </div>
     </div>
     {% else %}
-    <div class="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100">
+    <div class="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100 dark:border-gray-700">
         <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
         </svg>

@@ -5,13 +5,13 @@
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Account Settings</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Account Settings</h1>
         <p class="text-gray-600 mt-2">Manage your account and preferences</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="md:col-span-1">
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
                 <h3 class="text-lg font-semibold mb-6">Settings Menu</h3>
                 <nav class="space-y-2">
                     <a href="#account" onclick="scrollToSection('account')" class="block px-4 py-3 bg-medical-blue-50 text-medical-blue-600 rounded-lg font-medium transition">
@@ -28,7 +28,7 @@
         </div>
 
         <div class="md:col-span-2 space-y-6">
-            <div id="account" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div id="account" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
                 <h2 class="text-xl font-semibold mb-6 flex items-center">
                     <svg class="h-6 w-6 mr-3 text-medical-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -42,8 +42,8 @@
                             {{ current_user.username[0].upper() }}
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm text-gray-600">Username</p>
-                            <p class="text-lg font-semibold text-gray-900">{{ current_user.username }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Username</p>
+                            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ current_user.username }}</p>
                         </div>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                 </form>
             </div>
 
-            <div id="security" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div id="security" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
                 <h2 class="text-xl font-semibold mb-6 flex items-center">
                     <svg class="h-6 w-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
@@ -131,7 +131,7 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
                 <h2 class="text-xl font-semibold mb-4 flex items-center">
                     <svg class="h-6 w-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
