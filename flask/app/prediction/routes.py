@@ -260,6 +260,12 @@ def get_rl_stats():
     stats = rl_system.get_feedback_stats()
     return jsonify(stats)
 
+@prediction_bp.route('/rl-dashboard', methods=['GET'])
+@login_required
+def rl_dashboard():
+    """Display RL model performance dashboard"""
+    return render_template('rl_dashboard.html')
+
 @prediction_bp.route('/chart-data/<int:record_id>', methods=['GET'])
 @login_required
 def get_chart_data(record_id):
