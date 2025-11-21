@@ -26,6 +26,7 @@ def create_app(config_class=Config):
     from app.history import history_bp
     from app.gamification import gamification_bp
     from app.chatbot import chatbot_bp
+    from app.profile import profile_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
@@ -33,6 +34,7 @@ def create_app(config_class=Config):
     app.register_blueprint(history_bp, url_prefix='/history')
     app.register_blueprint(gamification_bp, url_prefix='/gamification')
     app.register_blueprint(chatbot_bp, url_prefix='/chatbot')
+    app.register_blueprint(profile_bp, url_prefix='/profile')
     
     with app.app_context():
         db.create_all()
