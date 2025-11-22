@@ -30,6 +30,7 @@ def create_app(config_class=Config):
     from app.doctor import doctor_bp
     from app.admin import admin_bp
     from app.patient import patient_bp
+    from app.prevention import prevention_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
@@ -41,6 +42,7 @@ def create_app(config_class=Config):
     app.register_blueprint(doctor_bp, url_prefix='/doctor')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(patient_bp, url_prefix='/patient')
+    app.register_blueprint(prevention_bp, url_prefix='/prevention')
     
     with app.app_context():
         db.create_all()

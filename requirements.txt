@@ -8,3 +8,5 @@ Flask-Bcrypt
 reportlab
 reportlab
 openai
+psycopg2-binary
+python-dotenv

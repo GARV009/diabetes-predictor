@@ -12,14 +12,16 @@ from pathlib import Path
 
 class RLFeedbackSystem:
     """
-    Simple RL system that tracks prediction accuracy and adjusts confidence scores
-    based on actual health outcomes reported by users
+    RL system that tracks:
+    1. Prediction accuracy and adjusts confidence scores
+    2. Preventive measure effectiveness to recommend interventions
     """
     
     def __init__(self, feedback_file='rl_feedback_data.pkl'):
         self.feedback_file = feedback_file
         self.feedback_history = self._load_feedback()
         self.confidence_adjustment = 0.0
+        self.intervention_effectiveness = self._init_interventions()
         
     def _load_feedback(self):
         """Load existing feedback history"""
@@ -27,19 +29,29 @@ class RLFeedbackSystem:
             try:
                 return joblib.load(self.feedback_file)
             except:
-                return {
-                    'total_predictions': 0,
-                    'correct_predictions': 0,
-                    'predictions_by_risk_level': {},
-                    'user_feedback': [],
-                    'accuracy_history': []
-                }
+                return self._init_feedback()
+        return self._init_feedback()
+    
+    def _init_feedback(self):
+        """Initialize feedback structure"""
         return {
             'total_predictions': 0,
             'correct_predictions': 0,
             'predictions_by_risk_level': {},
             'user_feedback': [],
-            'accuracy_history': []
+            'accuracy_history': [],
+            'interventions': {}  # Track preventive measure effectiveness
+        }
+    
+    def _init_interventions(self):
+        """Initialize intervention tracking structure"""
+        return {
+            'exercise': {'total': 0, 'effective': 0, 'avg_glucose_reduction': 0},
+            'diet_change': {'total': 0, 'effective': 0, 'avg_glucose_reduction': 0},
+            'stress_management': {'total': 0, 'effective': 0, 'avg_glucose_reduction': 0},
+            'sleep_improvement': {'total': 0, 'effective': 0, 'avg_glucose_reduction': 0},
+            'medication': {'total': 0, 'effective': 0, 'avg_glucose_reduction': 0},
+            'hydration': {'total': 0, 'effective': 0, 'avg_glucose_reduction': 0},
         }
     
     def save_feedback(self):
@@ -119,6 +131,80 @@ class RLFeedbackSystem:
             'confidence_adjustment': self.get_confidence_adjustment(),
             'recent_accuracy_history': self.feedback_history['accuracy_history'][-5:] if self.feedback_history['accuracy_history'] else []
         }
+    
+    def record_intervention(self, user_id, measure_type, baseline_glucose, outcome_glucose, effectiveness_score):
+        """
+        Record preventive measure effectiveness
+        measure_type: exercise, diet_change, stress_management, sleep_improvement, medication, hydration
+        effectiveness_score: 0-1 scale (higher = more effective)
+        """
+        if measure_type not in self.intervention_effectiveness:
+            return False
+        
+        # Calculate glucose reduction
+        glucose_reduction = max(0, baseline_glucose - outcome_glucose)
+        
+        # Update intervention tracking
+        intervention = self.intervention_effectiveness[measure_type]
+        intervention['total'] += 1
+        
+        if effectiveness_score >= 0.5:  # Consider effective if >= 50% effective
+            intervention['effective'] += 1
+        
+        # Update average glucose reduction (moving average)
+        if intervention['total'] == 1:
+            intervention['avg_glucose_reduction'] = glucose_reduction
+        else:
+            intervention['avg_glucose_reduction'] = (
+                (intervention['avg_glucose_reduction'] * (intervention['total'] - 1) + glucose_reduction) 
+                / intervention['total']
+            )
+        
+        self.save_feedback()
+        return True
+    
+    def get_recommended_interventions(self, current_glucose, current_bmi, risk_level):
+        """
+        Get personalized intervention recommendations based on what works best
+        Returns list of interventions sorted by effectiveness
+        """
+        recommendations = []
+        
+        for measure_type, stats in self.intervention_effectiveness.items():
+            if stats['total'] == 0:
+                continue
+            
+            effectiveness_rate = stats['effective'] / stats['total']
+            glucose_impact = stats['avg_glucose_reduction']
+            
+            # Score based on effectiveness and glucose impact
+            score = (effectiveness_rate * 0.6) + (min(glucose_impact / 50, 1.0) * 0.4)
+            
+            recommendations.append({
+                'type': measure_type,
+                'effectiveness_rate': effectiveness_rate,
+                'avg_glucose_reduction': glucose_impact,
+                'total_users_tried': stats['total'],
+                'success_count': stats['effective'],
+                'score': score
+            })
+        
+        # Sort by effectiveness score
+        recommendations.sort(key=lambda x: x['score'], reverse=True)
+        return recommendations
+    
+    def get_intervention_stats(self):
+        """Get detailed intervention statistics"""
+        stats = {}
+        for measure_type, data in self.intervention_effectiveness.items():
+            if data['total'] > 0:
+                stats[measure_type] = {
+                    'total': data['total'],
+                    'effective': data['effective'],
+                    'effectiveness_rate': (data['effective'] / data['total']) * 100,
+                    'avg_glucose_reduction': round(data['avg_glucose_reduction'], 1)
+                }
+        return stats
 
 # Initialize RL system when module loads
 rl_system = RLFeedbackSystem()

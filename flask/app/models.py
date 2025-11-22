@@ -160,3 +160,37 @@ class Appointment(db.Model):
     
     def __repr__(self):
         return f'<Appointment {self.id} - Patient {self.patient_id}>'
+
+
+class PreventiveMeasure(db.Model):
+    __tablename__ = 'preventive_measures'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    measure_type = db.Column(db.String(50), nullable=False)  # exercise, diet_change, stress_management, medication, sleep_improvement, hydration
+    measure_description = db.Column(db.String(255), nullable=False)
+    
+    start_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), default='active')  # active, completed, abandoned
+    
+    # Baseline metrics when intervention started
+    baseline_glucose = db.Column(db.Float, nullable=True)
+    baseline_bmi = db.Column(db.Float, nullable=True)
+    baseline_bp_systolic = db.Column(db.Integer, nullable=True)
+    
+    # Outcome metrics (recorded later)
+    outcome_glucose = db.Column(db.Float, nullable=True)
+    outcome_bmi = db.Column(db.Float, nullable=True)
+    outcome_bp_systolic = db.Column(db.Integer, nullable=True)
+    
+    # RL tracking
+    effectiveness_score = db.Column(db.Float, default=0.0)  # 0-1 scale
+    user_rating = db.Column(db.Integer, nullable=True)  # 1-5 user feedback
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<PreventiveMeasure {self.id} - User {self.user_id} - {self.measure_type}>'
