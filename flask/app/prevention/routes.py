@@ -120,12 +120,20 @@ def update_measure(measure_id):
         measure.outcome_bmi = latest_record.bmi
         measure.outcome_bp_systolic = latest_record.bp_systolic
         
-        # Calculate effectiveness
-        if measure.baseline_glucose and latest_record.glucose:
-            glucose_improvement = max(0, measure.baseline_glucose - latest_record.glucose)
-            # Effectiveness: 0-1 scale (0% improvement = 0.0, 10+ mg/dL improvement = 1.0)
-            effectiveness = min(glucose_improvement / 20, 1.0)
+        # Calculate effectiveness based on user's rating
+        if measure.user_rating:
+            # User rating (1-5) directly maps to effectiveness (0-1)
+            # 1 star = 20%, 2 stars = 40%, 3 stars = 60%, 4 stars = 80%, 5 stars = 100%
+            effectiveness = (measure.user_rating / 5.0)
             measure.effectiveness_score = effectiveness
+            
+            # Also consider glucose improvement if available
+            if measure.baseline_glucose and latest_record.glucose:
+                glucose_improvement = max(0, measure.baseline_glucose - latest_record.glucose)
+                glucose_effectiveness = min(glucose_improvement / 20, 1.0)
+                # Weighted average: 70% user rating, 30% glucose improvement
+                effectiveness = (effectiveness * 0.7) + (glucose_effectiveness * 0.3)
+                measure.effectiveness_score = effectiveness
             
             # Record to RL system for learning
             if rl_system:
@@ -134,7 +142,7 @@ def update_measure(measure_id):
                         user_id=current_user.id,
                         measure_type=measure.measure_type,
                         baseline_glucose=measure.baseline_glucose,
-                        outcome_glucose=latest_record.glucose,
+                        outcome_glucose=latest_record.glucose if latest_record.glucose else measure.baseline_glucose,
                         effectiveness_score=effectiveness
                     )
                 except Exception as e:
