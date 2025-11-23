@@ -3,8 +3,16 @@ from flask_login import login_required, current_user
 from app import db
 from app.models import PreventiveMeasure, HealthRecord
 from app.prevention import prevention_bp
-from rl_feedback_system import rl_system
 from datetime import datetime, timedelta
+
+try:
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    from rl_feedback_system import rl_system
+except Exception as e:
+    print(f"Warning: Could not import RL system: {e}")
+    rl_system = None
 
 @prevention_bp.route('/')
 @login_required
@@ -29,15 +37,17 @@ def prevention_dashboard():
     
     # Get RL-based intervention recommendations
     recommendations = []
-    if latest_record:
-        recommendations = rl_system.get_recommended_interventions(
-            latest_record.glucose,
-            latest_record.bmi,
-            latest_record.risk_level
-        )
-    
-    # Get intervention statistics from RL system
-    intervention_stats = rl_system.get_intervention_stats()
+    intervention_stats = {}
+    if rl_system and latest_record:
+        try:
+            recommendations = rl_system.get_recommended_interventions(
+                latest_record.glucose,
+                latest_record.bmi,
+                latest_record.risk_level
+            )
+            intervention_stats = rl_system.get_intervention_stats()
+        except Exception as e:
+            print(f"Error getting RL recommendations: {e}")
     
     return render_template('prevention/dashboard.html',
                          active_measures=active_measures,
@@ -118,13 +128,17 @@ def update_measure(measure_id):
             measure.effectiveness_score = effectiveness
             
             # Record to RL system for learning
-            rl_system.record_intervention(
-                user_id=current_user.id,
-                measure_type=measure.measure_type,
-                baseline_glucose=measure.baseline_glucose,
-                outcome_glucose=latest_record.glucose,
-                effectiveness_score=effectiveness
-            )
+            if rl_system:
+                try:
+                    rl_system.record_intervention(
+                        user_id=current_user.id,
+                        measure_type=measure.measure_type,
+                        baseline_glucose=measure.baseline_glucose,
+                        outcome_glucose=latest_record.glucose,
+                        effectiveness_score=effectiveness
+                    )
+                except Exception as e:
+                    print(f"Error recording intervention: {e}")
     
     if status == 'completed':
         measure.end_date = datetime.utcnow()
