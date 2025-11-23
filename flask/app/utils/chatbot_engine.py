@@ -1,97 +1,129 @@
-import random
+import os
+from openai import OpenAI
+
+# Initialize OpenAI client with API key from environment
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+# Store conversation histories per user (in production, use database)
+conversation_histories = {}
 
 class HealthChatbot:
     def __init__(self):
-        self.responses = {
-            'greeting': [
-                "Hello! I'm your health assistant. How can I help you today?",
-                "Hi there! I'm here to help with your health questions.",
-                "Welcome! Ask me anything about diabetes, diet, or healthy living."
-            ],
-            'diet': {
-                'keywords': ['diet', 'food', 'eat', 'meal', 'nutrition', 'calorie'],
-                'responses': [
-                    "A balanced diet is key to managing diabetes. Focus on:\n• Complex carbohydrates (whole grains, vegetables)\n• Lean proteins (fish, chicken, legumes)\n• Healthy fats (nuts, avocado, olive oil)\n• Limit sugary foods and refined carbs",
-                    "For diabetes management, consider:\n• Eating at regular intervals\n• Portion control\n• High-fiber foods\n• Avoiding sugary drinks\n• Choosing foods with low glycemic index",
-                    "Meal planning tips:\n• Include vegetables in every meal\n• Choose whole grains over refined\n• Have protein with each meal\n• Snack on nuts, not chips\n• Stay hydrated with water"
-                ]
-            },
-            'glucose': {
-                'keywords': ['glucose', 'blood sugar', 'sugar level', 'a1c', 'glycemic'],
-                'responses': [
-                    "Blood sugar management is crucial. Here's what helps:\n• Regular monitoring\n• Consistent meal timing\n• Physical activity\n• Medication as prescribed\n• Stress management\n\nTarget fasting glucose: 80-130 mg/dL",
-                    "To maintain healthy blood sugar:\n• Avoid skipping meals\n• Choose low glycemic index foods\n• Exercise regularly (30 min/day)\n• Get adequate sleep (7-8 hours)\n• Monitor levels as recommended by your doctor",
-                    "High blood sugar can be managed by:\n• Drinking water\n• Light physical activity\n• Avoiding simple carbs\n• Taking prescribed medication\n• Consulting your doctor if persistently high"
-                ]
-            },
-            'exercise': {
-                'keywords': ['exercise', 'workout', 'physical activity', 'fitness', 'gym', 'walk'],
-                'responses': [
-                    "Exercise is great for diabetes management!\n• Aim for 150 minutes/week of moderate activity\n• Mix cardio and strength training\n• Start slowly if you're new\n• Check blood sugar before/after exercise\n• Stay hydrated",
-                    "Best exercises for diabetes:\n• Brisk walking\n• Swimming\n• Cycling\n• Yoga\n• Strength training\n\nRemember: Even 10 minutes counts!",
-                    "Exercise tips for diabetics:\n• Exercise at the same time daily\n• Carry a quick sugar source\n• Wear proper footwear\n• Monitor for hypoglycemia\n• Stay consistent"
-                ]
-            },
-            'stress': {
-                'keywords': ['stress', 'anxiety', 'worry', 'tension', 'relax'],
-                'responses': [
-                    "Stress can affect blood sugar. Try these:\n• Deep breathing exercises\n• Meditation (10 min/day)\n• Regular sleep schedule\n• Connect with friends/family\n• Engage in hobbies\n• Consider professional support if needed",
-                    "Managing stress helps diabetes control:\n• Practice mindfulness\n• Do gentle yoga\n• Take short breaks during work\n• Avoid caffeine overload\n• Spend time in nature",
-                    "Stress reduction techniques:\n• Progressive muscle relaxation\n• Guided imagery\n• Journaling\n• Listening to calming music\n• Regular exercise\n• Adequate sleep"
-                ]
-            },
-            'sleep': {
-                'keywords': ['sleep', 'rest', 'tired', 'fatigue', 'insomnia'],
-                'responses': [
-                    "Quality sleep is essential for diabetes management:\n• Aim for 7-9 hours nightly\n• Keep a consistent sleep schedule\n• Avoid screens 1 hour before bed\n• Keep bedroom cool and dark\n• Avoid large meals before bedtime",
-                    "Better sleep improves blood sugar control:\n• Establish a bedtime routine\n• Limit caffeine after 2 PM\n• Avoid alcohol before bed\n• Exercise during the day\n• Manage stress\n• Check with doctor if you have sleep apnea",
-                    "Sleep hygiene tips:\n• Same bedtime every night\n• Comfortable mattress/pillow\n• No TV in bedroom\n• Light reading before sleep\n• Avoid daytime naps if possible\n• Relaxation techniques before bed"
-                ]
-            },
-            'medication': {
-                'keywords': ['medication', 'medicine', 'insulin', 'drug', 'pill', 'prescription'],
-                'responses': [
-                    "Medication management tips:\n• Take medications as prescribed\n• Don't skip doses\n• Store insulin properly (if applicable)\n• Set reminders if needed\n• Discuss side effects with your doctor\n• Never adjust dosage without medical advice",
-                    "Important medication reminders:\n• Take at the same time daily\n• Know your medications' names and purposes\n• Keep a medication list\n• Refill before running out\n• Inform all healthcare providers\n• Report any adverse reactions",
-                    "For insulin users:\n• Rotate injection sites\n• Check expiration dates\n• Store at proper temperature\n• Know signs of hypoglycemia\n• Carry glucose tablets\n• Wear medical ID"
-                ]
-            },
-            'symptoms': {
-                'keywords': ['symptom', 'feel', 'sick', 'pain', 'dizzy', 'thirsty'],
-                'responses': [
-                    "Common diabetes symptoms to watch:\n• Increased thirst\n• Frequent urination\n• Fatigue\n• Blurred vision\n• Slow healing wounds\n\n⚠️ If symptoms worsen, contact your doctor immediately.",
-                    "Warning signs requiring medical attention:\n• Very high/low blood sugar\n• Persistent nausea/vomiting\n• Difficulty breathing\n• Confusion or disorientation\n• Chest pain\n\nDon't wait - seek medical help!",
-                    "Track your symptoms:\n• Keep a health journal\n• Monitor blood sugar regularly\n• Note patterns\n• Share with your doctor\n• Don't ignore warning signs"
-                ]
-            },
-            'general': {
-                'keywords': ['help', 'info', 'tell me', 'what', 'how'],
-                'responses': [
-                    "I can help you with:\n• Diet and nutrition advice\n• Exercise recommendations\n• Blood sugar management\n• Stress reduction\n• Sleep tips\n• Medication reminders\n\nWhat would you like to know more about?",
-                    "Managing diabetes involves:\n• Healthy eating\n• Regular physical activity\n• Monitoring blood sugar\n• Taking medications as prescribed\n• Managing stress\n• Regular checkups\n\nWhich area interests you?",
-                    "Living well with diabetes:\n• Stay informed\n• Follow your treatment plan\n• Build healthy habits\n• Stay connected with healthcare team\n• Don't hesitate to ask questions\n\nHow can I help you today?"
-                ]
-            }
-        }
+        self.system_prompt = """You are a knowledgeable and empathetic health assistant specializing in diabetes management and preventive health. You provide evidence-based health advice while always encouraging users to consult with their healthcare providers for medical concerns.
+
+Your expertise includes:
+- Diabetes prevention and management
+- Personalized diet planning and nutrition advice
+- Exercise and fitness recommendations
+- Blood sugar management strategies
+- Stress management and mental wellness
+- Sleep optimization
+- Medication adherence support
+- Preventive health measures
+- Health metrics interpretation (glucose, BMI, blood pressure)
+
+Key principles:
+1. Always be empathetic and supportive
+2. Provide actionable, practical advice
+3. Never diagnose or treat medical conditions
+4. Always recommend consulting healthcare providers for serious concerns
+5. Use the user's health context when available
+6. Encourage healthy habits and positive behavior change
+7. Celebrate user progress and achievements
+8. Provide evidence-based information
+9. Personalize recommendations based on user profile
+
+Conversation style:
+- Be conversational and friendly
+- Use simple, understandable language
+- Break complex information into digestible pieces
+- Ask clarifying questions when needed
+- Provide specific, measurable recommendations
+- Acknowledge user concerns and validate feelings"""
     
-    def get_response(self, user_message):
-        message_lower = user_message.lower()
-        
-        greetings = ['hi', 'hello', 'hey', 'greetings']
-        if any(word in message_lower.split() for word in greetings):
-            return random.choice(self.responses['greeting'])
-        
-        for category, data in self.responses.items():
-            if category == 'greeting':
-                continue
+    def get_response(self, user_message, user_id=None, user_context=None):
+        """Get AI-powered response from OpenAI with conversation history"""
+        try:
+            # Initialize conversation history for user if not exists
+            if user_id and user_id not in conversation_histories:
+                conversation_histories[user_id] = []
             
-            if isinstance(data, dict) and 'keywords' in data:
-                if any(keyword in message_lower for keyword in data['keywords']):
-                    return random.choice(data['responses'])
+            # Build user context string for better personalization
+            context_info = ""
+            if user_context:
+                context_info = f"\n\nUser Health Context:\n"
+                if user_context.get('glucose'):
+                    context_info += f"- Recent glucose: {user_context['glucose']} mg/dL\n"
+                if user_context.get('bmi'):
+                    context_info += f"- BMI: {user_context['bmi']}\n"
+                if user_context.get('risk_level'):
+                    context_info += f"- Diabetes risk: {user_context['risk_level']}\n"
+                if user_context.get('age'):
+                    context_info += f"- Age: {user_context['age']}\n"
+                if user_context.get('recent_activities'):
+                    context_info += f"- Recent activities: {', '.join(user_context['recent_activities'])}\n"
+            
+            # Prepare messages for API
+            messages = []
+            
+            # Add conversation history if exists
+            if user_id and user_id in conversation_histories:
+                messages.extend(conversation_histories[user_id])
+            
+            # Add current user message with context
+            full_message = user_message + context_info if context_info else user_message
+            messages.append({
+                "role": "user",
+                "content": full_message
+            })
+            
+            # Call OpenAI API
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": self.system_prompt
+                    }
+                ] + messages,
+                temperature=0.7,
+                max_tokens=500,
+                top_p=0.9,
+            )
+            
+            # Extract response text
+            assistant_message = response.choices[0].message.content
+            
+            # Store conversation history for continuity (keep last 10 exchanges)
+            if user_id:
+                conversation_histories[user_id].append({
+                    "role": "user",
+                    "content": user_message
+                })
+                conversation_histories[user_id].append({
+                    "role": "assistant",
+                    "content": assistant_message
+                })
+                
+                # Keep only last 10 exchanges (20 messages) for context
+                if len(conversation_histories[user_id]) > 20:
+                    conversation_histories[user_id] = conversation_histories[user_id][-20:]
+            
+            return assistant_message
         
-        return random.choice(self.responses['general']['responses'])
+        except Exception as e:
+            error_msg = str(e)
+            if "API key" in error_msg or "authentication" in error_msg.lower():
+                return "⚠️ Health Assistant is temporarily unavailable. Please check API configuration."
+            return f"I apologize, I encountered an issue. Please try again: {error_msg[:100]}"
 
 chatbot = HealthChatbot()
 
-def get_chatbot_response(message):
-    return chatbot.get_response(message)
+def get_chatbot_response(message, user_id=None, user_context=None):
+    """Wrapper function for backward compatibility"""
+    return chatbot.get_response(message, user_id, user_context)
+
+def clear_conversation_history(user_id):
+    """Clear conversation history for a user"""
+    if user_id in conversation_histories:
+        del conversation_histories[user_id]
