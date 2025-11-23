@@ -10,9 +10,9 @@ def get_openai_client():
     """Lazily initialize and return OpenAI client"""
     global _openai_client
     if _openai_client is None:
-        api_key = os.environ.get('OPENAI_API_KEY')
+        api_key = os.environ.get('OPENAI_API_KEY2')
         if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable not set")
+            raise ValueError("OPENAI_API_KEY2 environment variable not set")
         _openai_client = OpenAI(api_key=api_key)
     return _openai_client
 
