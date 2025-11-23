@@ -1,11 +1,20 @@
 import os
 from openai import OpenAI
 
-# Initialize OpenAI client with API key from environment
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-
 # Store conversation histories per user (in production, use database)
 conversation_histories = {}
+# Lazy-loaded OpenAI client
+_openai_client = None
+
+def get_openai_client():
+    """Lazily initialize and return OpenAI client"""
+    global _openai_client
+    if _openai_client is None:
+        api_key = os.environ.get('OPENAI_API_KEY')
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable not set")
+        _openai_client = OpenAI(api_key=api_key)
+    return _openai_client
 
 class HealthChatbot:
     def __init__(self):
@@ -44,6 +53,9 @@ Conversation style:
     def get_response(self, user_message, user_id=None, user_context=None):
         """Get AI-powered response from OpenAI with conversation history"""
         try:
+            # Get lazily-initialized client
+            client = get_openai_client()
+            
             # Initialize conversation history for user if not exists
             if user_id and user_id not in conversation_histories:
                 conversation_histories[user_id] = []
@@ -113,7 +125,9 @@ Conversation style:
         
         except Exception as e:
             error_msg = str(e)
-            if "API key" in error_msg or "authentication" in error_msg.lower():
+            import traceback
+            traceback.print_exc()
+            if "API key" in error_msg or "authentication" in error_msg.lower() or "OPENAI_API_KEY" in error_msg:
                 return "⚠️ Health Assistant is temporarily unavailable. Please check API configuration."
             return f"I apologize, I encountered an issue. Please try again: {error_msg[:100]}"
 
